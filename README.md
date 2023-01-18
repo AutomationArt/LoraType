@@ -1,31 +1,31 @@
 [![LoraType](https://github.com/AutomationArt/LoraType/blob/main/lib/LoraType.png?raw=true "LoraType")](https://github.com/AutomationArt/LoraType/blob/main/lib/LoraType.png?raw=true "LoraType")
-    
+
 ### LoraType..|
 First of all, our priority is to make the user experience as simple as possible. It only has an on/off button, a widespread QWERTY-keyboard and a cute e-ink display. That’s it. However, in spite of simplicity the Loratype can be used as a tiny PC with possibility for programming and adding new functions thanks to embedded wi-fi, bluetooth and esp32. Welcome on board and feel like home, dear like-minded fellows! There are some extra features: the LoRa-protocol is noise-resistant, and the communication range is about 1 km in a city and up to 7 km in line-of-sight coverage. And of course it is totally free of charge, Loratype has been created not by a Corporation for population, but by people for people . Thus, in any emergency condition we will honorably stay together!
 
 
 **This project is open source. We opened all circuits and software**
 
-## Connect with family and friends in any environment
+### Connect with family and friends in any environment
 
-#Device features
+###Device features
 
 - FREE OF CHARGE (Lora user doesn't need to pay for the service)
 - AUTONOMOUS DEVICE (I am developing LoraType to be completely autonomous)
 - INDEPENDED OF INTERNET, 5G, GSM ETC. (Stay connected without Internet!)
 
-#USE CASES
+###USE CASES
 
 - During disasters like earthquakes, floods, hurricanes, and fires among others
 - Hiking or camping far away from cities, receptions etc
 - In a war zone or mass protests (when government could shut down the internet)
 - When you need free messaging (your plan is expired or you do not have a mobile data on your phone)
 
-##We have passed several important stages of product development
+###We have passed several important stages of product development
 
 ![Photo Black PCB to White PCB](http:// "Photo Black to White")
 
-# Specifications
+###Specifications
 
 |   |   |
 | ------------ | ------------ |
@@ -37,10 +37,10 @@ First of all, our priority is to make the user experience as simple as possible.
 | **LDO regulator**  | [AP2112](https://www.digikey.com/en/products/detail/diodes-incorporated/AP2112K-3-3TRG1/4470746 "AP2112") is CMOS процес low dropout linear regulator with enable function  |
 
 
-#####We used good solutions from Good Display, Espressif, Texas Instruments
+####We used good solutions from Good Display, Espressif, Texas Instruments
 
 
-#Comparisons
+###Comparisons
 |   #| LoraType  |  RippleQWERTY  |   ArmaChat | LoRa Msg  | ESPboy LORA  |
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |
 | **Open Source ** |   |   |   |   |   |
@@ -49,19 +49,15 @@ First of all, our priority is to make the user experience as simple as possible.
 |  **Size** |   |   |   |   |   |
 |  **Price** |   |   |   |   |   |
 
-#Funding goal
+###Funding goal
 
-#Manufacturing Plan & Risks
+###Manufacturing Plan & Risks
 
-#Mentions about LoraType
+###Mentions about LoraType
 
-#Support & Documentation
+###Support & Documentation
 
 - STL models for cases
 - Component Documentation
 - Software Example
 - Support Chat
-
-
-
-https://pandao.github.io/editor.md/en.html
