@@ -6,26 +6,24 @@ First of all, our priority is to make the user experience as simple as possible.
 
 **This project is open source. We opened all circuits and software**
 
-### Connect with family and friends in any environment
-
-###Device features
+### Device features
 
 - FREE OF CHARGE (Lora user doesn't need to pay for the service)
 - AUTONOMOUS DEVICE (I am developing LoraType to be completely autonomous)
 - INDEPENDED OF INTERNET, 5G, GSM ETC. (Stay connected without Internet!)
 
-###USE CASES
+### USE CASES
 
 - During disasters like earthquakes, floods, hurricanes, and fires among others
 - Hiking or camping far away from cities, receptions etc
 - In a war zone or mass protests (when government could shut down the internet)
 - When you need free messaging (your plan is expired or you do not have a mobile data on your phone)
 
-###We have passed several important stages of product development
+### We have passed several important stages of product development
 
 ![Photo Black PCB to White PCB](http:// "Photo Black to White")
 
-###Specifications
+### Specifications
 
 |   |   |
 | ------------ | ------------ |
@@ -37,10 +35,10 @@ First of all, our priority is to make the user experience as simple as possible.
 | **LDO regulator**  | [AP2112](https://www.digikey.com/en/products/detail/diodes-incorporated/AP2112K-3-3TRG1/4470746 "AP2112") is CMOS процес low dropout linear regulator with enable function  |
 
 
-####We used good solutions from Good Display, Espressif, Texas Instruments
+#### We used good solutions from Good Display, Espressif, Texas Instruments
 
 
-###Comparisons
+### Comparisons
 |   #| LoraType  |  RippleQWERTY  |   ArmaChat | LoRa Msg  | ESPboy LORA  |
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |
 | **Open Source ** |   |   |   |   |   |
@@ -49,13 +47,13 @@ First of all, our priority is to make the user experience as simple as possible.
 |  **Size** |   |   |   |   |   |
 |  **Price** |   |   |   |   |   |
 
-###Funding goal
+### Funding goal
 
-###Manufacturing Plan & Risks
+### Manufacturing Plan & Risks
 
-###Mentions about LoraType
+### Mentions about LoraType
 
-###Support & Documentation
+### Support & Documentation
 
 - STL models for cases
 - Component Documentation
