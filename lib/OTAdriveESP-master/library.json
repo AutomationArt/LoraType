@@ -1,0 +1,24 @@
+{
+  "name": "OTAdrive",
+  "version": "1.0.8",
+  "description": "OTAdrive official library for ESP8266/ESP32 in Arduino platform",
+  "keywords": "OTAdrive, OTA",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/otadrive/OTAdriveESP.git"
+  },
+  "authors":
+  [
+    {
+      "name": "OTAdrive",
+      "email": "info@otadrive.com",
+      "url": "https://www.otadrive.com"
+    }
+  ],
+  "license": "MIT",
+  "homepage": "https://www.otadrive.com",
+  "exclude": [".github", "extras", "docs", "assets"],
+  "frameworks": "arduino",
+  "platforms": ["espressif8266", "espressif32"]
+}
