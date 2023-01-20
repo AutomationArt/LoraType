@@ -1,8 +1,13 @@
-[![LoraType](https://github.com/AutomationArt/LoraType/blob/main/lib/LoraType.png?raw=true "LoraType")](https://github.com/AutomationArt/LoraType/blob/main/lib/LoraType.png?raw=true "LoraType")
+[![LoraType](https://github.com/AutomationArt/LoraType/blob/image/LoraType.png?raw=true "LoraType")](https://github.com/AutomationArt/LoraType/blob/image/LoraType.png?raw=true "LoraType")
 
 ### LoraType..|
 First of all, our priority is to make the user experience as simple as possible. It only has an on/off button, a widespread QWERTY-keyboard and a cute e-ink display. That’s it. However, in spite of simplicity the Loratype can be used as a tiny PC with possibility for programming and adding new functions thanks to embedded wi-fi, bluetooth and esp32. Welcome on board and feel like home, dear like-minded fellows! There are some extra features: the LoRa-protocol is noise-resistant, and the communication range is about 1 km in a city and up to 7 km in line-of-sight coverage. And of course it is totally free of charge, Loratype has been created not by a Corporation for population, but by people for people . Thus, in any emergency condition we will honorably stay together!
 
+###How Does it Work?
+
+1. Turn on the device
+2. Wait a moment (search for interlocutors in the mesh network)
+3. Chat, stay in touch without paying for traffic!
 
 **This project is open source. We opened all circuits and software**
 
@@ -22,6 +27,12 @@ First of all, our priority is to make the user experience as simple as possible.
 ### We have passed several important stages of product development
 
 ![Photo Black PCB to White PCB](http:// "Photo Black to White")
+
+
+
+[![LoraType](https://github.com/AutomationArt/LoraType/blob/image/LoraType_PCB.png?raw=true "LoraTypePCB")](https://github.com/AutomationArt/LoraType/blob/image/LoraType_PCB.png?raw=true "LoraTypePCB")
+
+
 
 ### Specifications
 
