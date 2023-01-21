@@ -52,9 +52,9 @@ LoRa contains all the fundamental building blocks needed and used by any modern 
 ### Comparisons
 |   #| LoraType  |  RippleQWERTY  |   ArmaChat | LoRa Msg  | ESPboy LORA  |
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |
-| **Open Source ** |   |   |   |   |   |
-|  **Battery** |   |   |   |   |   |
-|  **Case** |   |   |   |   |   |
+| **Open Source ** |  yes |  yes |   |   |   |
+|  **Battery** |   | It is not specified exactly  |   |   |   |
+|  **Case** |  yes (choice is available) |  yes  |   |   |   |
 |  **Size** |   |   |   |   |   |
 |  **Price** |   |   |   |   |   |
 
