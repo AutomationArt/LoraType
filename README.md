@@ -28,9 +28,9 @@ First of all, our priority is to make the user experience as simple as possible.
 
 ![Photo Black PCB to White PCB](http:// "Photo Black to White")
 
+    
 
-
-[![LoraType](https://raw.githubusercontent.com/AutomationArt/LoraType/main/Image/LoraType_PCB.jpg "LoraTypePCB")](https://raw.githubusercontent.com/AutomationArt/LoraType/main/Image/LoraType_PCB.jpg "LoraTypePCB")
+[![LoraType](https://raw.githubusercontent.com/AutomationArt/LoraType/main/Image/LoraType_PCB.png "LoraTypePCB")](https://raw.githubusercontent.com/AutomationArt/LoraType/main/Image/LoraType_PCB.png "LoraTypePCB")
 
 
 
