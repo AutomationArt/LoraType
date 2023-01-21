@@ -22,13 +22,14 @@ First of all, our priority is to make the user experience as simple as possible.
 ### Security
 LoRa contains all the fundamental building blocks needed and used by any modern wireless technology, and it does so using the AES-128 standard. ([Lora Security](https://lora-alliance.org/wp-content/uploads/2020/11/lorawan_security_whitepaper.pdf "Lora Security"))
 
-
+------------
 ### We have passed several important stages of product development, which is very important
 
 [![LoraType](https://raw.githubusercontent.com/AutomationArt/LoraType/main/Image/LoraType_v1tov2.png "LoraTypePCB")](https://raw.githubusercontent.com/AutomationArt/LoraType/main/Image/LoraType_v1tov2.png "LoraTypePCB")
 
-[![LoraType_Case](https://raw.githubusercontent.com/AutomationArt/LoraType/main/3D model - Case/V1/LoraType_FirstCase.png "LoraTypePCB")](https://raw.githubusercontent.com/AutomationArt/LoraType/main/3D model - Case/V1/LoraType_FirstCase.png "LoraTypePCB")
+[![LoraType_Case](https://github.com/AutomationArt/LoraType/blob/main/3D%20model%20-%20Case/V1/LoraType_FirstCase.png "LoraTypePCB")](https://github.com/AutomationArt/LoraType/blob/main/3D%20model%20-%20Case/V1/LoraType_FirstCase.png "LoraTypePCB")
 
+------------
 
 ### Current PCB release
 
@@ -62,6 +63,8 @@ LoRa contains all the fundamental building blocks needed and used by any modern 
 ### Manufacturing Plan & Risks
 
 ### Mentions about LoraType
+
+------------
 
 ### Support & Documentation
 **This project is open source. We opened all circuits and software**
