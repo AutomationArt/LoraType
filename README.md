@@ -49,13 +49,25 @@ LoRa contains all the fundamental building blocks needed and used by any modern 
 ##### We used good solutions from Good Display, Espressif, Texas Instruments
 
 
+### Additional features for the community
+
+[![LoraTypeForDiy](https://raw.githubusercontent.com/AutomationArt/LoraType/main/Image/LoraType_ForDIY.png "LoraTypeForDiy")](https://raw.githubusercontent.com/AutomationArt/LoraType/main/Image/LoraType_ForDIY.png "LoraTypeForDiy")
+
+For device owners, the ability to add DIY add-ons is available.
+- Light firmware (UART)
+- Adding your own sensors to the device (via I2C bus)
+- Jtag debugging
+- Lipo battery change
+- Using integrated antenna
+- Connection of external power generators
+
 ### Comparisons
 |   #| LoraType  |  RippleQWERTY  |   ArmaChat | LoRa Msg  | ESPboy LORA  |
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |
-| **Open Source ** |  yes |  yes |   |   |   |
-|  **Battery** |   | It is not specified exactly  |   |   |   |
-|  **Case** |  yes (choice is available) |  yes  |   |   |   |
-|  **Size** |   |   |   |   |   |
+| **Open Source ** |  yes |  yes | yes |  yes | yes  |
+|  **Battery** | Li-po  | It is not specified exactly  | 18650  | 1500mA Li-Po |   |
+|  **Case** |  yes (choice is available+stl) |  yes (+stl)  |  pcb case  | yes (+stl) |  yes (+stl)  |
+|  **Size** |  110mm*60mm | not specify |  76mm x 71mm | 70mm*105mm  |  90mm*50mm |     
 |  **Price** |   |   |   |   |   |
 
 ### Funding goal
@@ -70,5 +82,5 @@ LoRa contains all the fundamental building blocks needed and used by any modern 
 **This project is open source. We opened all circuits and software**
 
 - [STL models for cases](https://github.com/AutomationArt/LoraType/tree/main/3D%20model%20-%20Case "STL models for cases") 
-- Component Documentation
+- [Component Documentation](https://github.com/AutomationArt/LoraType/tree/main/Documents "Component Documentation")
 - [Software Example](https://github.com/AutomationArt/LoraType/tree/main/Software "Software Example")
