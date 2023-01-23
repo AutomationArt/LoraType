@@ -44,7 +44,7 @@ LoRa contains all the fundamental building blocks needed and used by any modern 
 | **Lora Module**  | The [E22](https://www.ebyte.com/en/product-view-news.aspx?id=437 "E22") series is the first wireless module in China to adopt Semtech's SX1262, SX1268 RF chip. This chip provides a variety of modulation methods, such as LoRaTM and traditional GFSK. Its special LoRaTM modulation method increases the communication distance.    |
 | **Keyboard ** | [TCA8418RTWR](https://www.ti.com/product/TCA8418/part-details/TCA8418RTWR "TCA8418RTWR") Great built-in simultaneous click capabilities. Keyboard with built-in protection against electrostatic discharge.   |
 | **Charger **| [TP4056](http://www.tp4056.com/datasheet/ "TP4056") Proven by time and many users. Has battery protection. Battery will last longer |
-| **LDO regulator**  | [AP2112](https://www.digikey.com/en/products/detail/diodes-incorporated/AP2112K-3-3TRG1/4470746 "AP2112") is CMOS процес low dropout linear regulator with enable function  |
+| **LDO regulator**  | [AP2112](https://www.digikey.com/en/products/detail/diodes-incorporated/AP2112K-3-3TRG1/4470746 "AP2112") is CMOS low dropout linear regulator with enable function  |
 
 ##### We used good solutions from Good Display, Espressif, Texas Instruments
 
