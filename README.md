@@ -60,8 +60,8 @@ LoRa contains all the fundamental building blocks needed and used by any modern 
 **For device owners, the ability to add DIY add-ons is available.**
 - Fast firmware (UART)
 - Adding your own sensors to the device (via I2C bus)
-- Jtag debugging
-- Lipo battery change
+- JTAG debugging
+- Li-po battery change
 - Using integrated antenna
 - Connection of external power generators (Energy harvesters)
 
@@ -77,29 +77,29 @@ LoRa contains all the fundamental building blocks needed and used by any modern 
 - Network protocols: IPv4, IPv6, SSL, TCP/UDP/HTTP/FTP/MQTT
 - Software update over the air 
 
-Built-in radio module (SX1262) allows additional various radio communication methods ([RadioLibrary](https://github.com/jgromes/RadioLib/tree/master/examples "RadioLibrary")): -  [AFSK](https://en.wikipedia.org/wiki/Frequency-shift_keying "AFSK"), [APRS](https://en.wikipedia.org/wiki/Automatic_Packet_Reporting_System "APRS"), [AX25](https://en.wikipedia.org/wiki/AX.25 "AX25"), FSK4, [Hellschreiber](https://en.wikipedia.org/wiki/Hellschreiber "Hellschreiber,"),[ Morse](https://en.wikipedia.org/wiki/Morse_code " Morse"), [RTTY](https://en.wikipedia.org/wiki/Radioteletype "RTTY"), [SSTV](https://en.wikipedia.org/wiki/Slow-scan_television "SSTV")
+Built-in radio module (SX1262) allows additional various radio communication methods ([RadioLibrary](https://github.com/jgromes/RadioLib/tree/master/examples "RadioLibrary")):  [AFSK](https://en.wikipedia.org/wiki/Frequency-shift_keying "AFSK"), [APRS](https://en.wikipedia.org/wiki/Automatic_Packet_Reporting_System "APRS"), [AX25](https://en.wikipedia.org/wiki/AX.25 "AX25"), FSK4, [Hellschreiber](https://en.wikipedia.org/wiki/Hellschreiber "Hellschreiber,"),[ Morse](https://en.wikipedia.org/wiki/Morse_code " Morse"), [RTTY](https://en.wikipedia.org/wiki/Radioteletype "RTTY"), [SSTV](https://en.wikipedia.org/wiki/Slow-scan_television "SSTV")                        
 
-
-### Comparisons
+------------
+### Comparisons             
 |   #| LoraType  |  RippleQWERTY  |   ArmaChat | LoRa Msg  | ESPboy LORA  |
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |
 | **Open Source** |  yes |  yes | yes |  yes | yes  |
-| **Transceiver** |  |   |  |   |   |
-| **Transmit Power** |  |   |  |   |   |
-|  **Battery** | Li-po  | It is not specified exactly  | 18650  | 1500mA Li-Po |   |
+| **Transceiver** | SX1262  | SX1276  | RFM95W | RFM95W  | SX1278  |
+| **Transmit Power** | 22 dbm  | 19.5 dBm   | 20 dbm  | 20 dbm  |  30dBm  |
+| **Display** | E-Ink  | OLED  | TFT  | TFT   |  TFT  |
+|  **Battery** | Li-po 1100mA  | It is not specified exactly  | 18650  | 1500mA |  It is not specified exactly  |
 |  **Case** |  yes (choice is available+stl) |  yes (+stl)  |  pcb case  | yes (+stl) |  yes (+stl)  |
-|  **Size** |  110mm*60mm | not specify |  76mm x 71mm | 70mm*105mm  |  90mm*50mm | 
-|  **Price** |   |   |   |   |   |
-
-### Hardware Capabilities
+|  **Dimensions** |  110mm*60mm | not specify |  76mm x 71mm | 70mm*105mm  |  90mm*50mm | 
+|  **Wi-Fi** |  yes |  yes  |  no  |  no  |  yes  |
+|  **Bluetooth** | yes  |  yes  | no   | no   |  no   |
 
 ------------
 
 ### Support & Documentation
 **This project is open source. We opened all circuits and software**
 
-
-
+- Getting Started DIY here  :fa-arrow-left:
 - [STL models for cases](https://github.com/AutomationArt/LoraType/tree/main/3D%20model%20-%20Case "STL models for cases") 
-- [Component Documentation](https://github.com/AutomationArt/LoraType/tree/main/Documents "Component Documentation")
+- [Components Documentation](https://github.com/AutomationArt/LoraType/tree/main/Documents "Component Documentation")
 - [Software Example](https://github.com/AutomationArt/LoraType/tree/main/Software "Software Example")
+- On-line Support
