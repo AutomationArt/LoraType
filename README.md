@@ -75,7 +75,7 @@ LoRa contains all the fundamental building blocks needed and used by any modern 
 - Security: WPA/WPA2/WPA2-Enterprise/WPS
 - Encryption: AES/RSA/ECC/SHA
 - Network protocols: IPv4, IPv6, SSL, TCP/UDP/HTTP/FTP/MQTT
-- Software update over the air 
+- Software update over the air
 
 Built-in radio module (SX1262) allows additional various radio communication methods ([RadioLibrary](https://github.com/jgromes/RadioLib/tree/master/examples "RadioLibrary")):  [AFSK](https://en.wikipedia.org/wiki/Frequency-shift_keying "AFSK"), [APRS](https://en.wikipedia.org/wiki/Automatic_Packet_Reporting_System "APRS"), [AX25](https://en.wikipedia.org/wiki/AX.25 "AX25"), FSK4, [Hellschreiber](https://en.wikipedia.org/wiki/Hellschreiber "Hellschreiber,"),[ Morse](https://en.wikipedia.org/wiki/Morse_code " Morse"), [RTTY](https://en.wikipedia.org/wiki/Radioteletype "RTTY"), [SSTV](https://en.wikipedia.org/wiki/Slow-scan_television "SSTV")                        
 
@@ -88,17 +88,18 @@ Built-in radio module (SX1262) allows additional various radio communication met
 | **Transmit Power** | 22 dbm  | 19.5 dBm   | 20 dbm  | 20 dbm  |  30dBm  |
 | **Display** | E-Ink  | OLED  | TFT  | TFT   |  TFT  |
 |  **Battery** | Li-po 1100mA  | It is not specified exactly  | 18650  | 1500mA |  It is not specified exactly  |
-|  **Case** |  yes (choice is available+stl) |  yes (+stl)  |  pcb case  | yes (+stl) |  yes (+stl)  |
-|  **Dimensions** |  110mm*60mm | not specify |  76mm x 71mm | 70mm*105mm  |  90mm*50mm | 
+|  **Num. of buttons** |  36 |  35  |  30  |  35  |  6  |
 |  **Wi-Fi** |  yes |  yes  |  no  |  no  |  yes  |
 |  **Bluetooth** | yes  |  yes  | no   | no   |  no   |
+|  **Case** |  yes (choice is available+stl) |  yes (+stl)  |  pcb case  | yes (+stl) |  yes (+stl)  |
+|  **Dimensions** |  110mm*60mm | not specify |  76mm x 71mm | 70mm*105mm  |  90mm*50mm | 
 
 ------------
 
 ### Support & Documentation
 **This project is open source. We opened all circuits and software**
-
-- Getting Started DIY here  :fa-arrow-left:
+  
+- [Getting Started DIY here](https://github.com/AutomationArt/LoraType/tree/main/GettingStarted "Getting Started DIY here")  :fa-arrow-left:
 - [STL models for cases](https://github.com/AutomationArt/LoraType/tree/main/3D%20model%20-%20Case "STL models for cases") 
 - [Components Documentation](https://github.com/AutomationArt/LoraType/tree/main/Documents "Component Documentation")
 - [Software Example](https://github.com/AutomationArt/LoraType/tree/main/Software "Software Example")

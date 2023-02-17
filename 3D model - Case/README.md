@@ -2,3 +2,6 @@
 
 
 ### LoraType..|
+
+
+Cases and models for 3D printing LoraType
