@@ -39,7 +39,7 @@ LoRa contains all the fundamental building blocks needed and used by any modern 
 
 ### Specifications
 
-|   |   |
+|  Component | Description  |
 | ------------ | ------------ |
 | **Display**  | Durable low power screen that can store information for up to 6 months without consuming power (1.54 inch e-paper display module partial refresh E-ink screen, [GDEH0154D67](https://www.good-display.com/product/1.54-inch-e-paper-display-module-partial-refresh-E-ink-screen,-GDEH0154D67-208.html "GDEH0154D67"))   |
 | **Main controller** | The [ESP32](https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf "ESP32") module gives the device great advantages in development and functionality. You only need to replace the firmware over the air   |
@@ -99,8 +99,8 @@ Built-in radio module (SX1262) allows additional various radio communication met
 ### Support & Documentation
 **This project is open source. We opened all circuits and software**
   
-- [Getting Started DIY here](https://github.com/AutomationArt/LoraType/tree/main/GettingStarted "Getting Started DIY here")  :fa-arrow-left:
+- [Getting Started DIY here](https://github.com/AutomationArt/LoraType/tree/main/GettingStarted "Getting Started DIY here")  :white_check_mark:
 - [STL models for cases](https://github.com/AutomationArt/LoraType/tree/main/3D%20model%20-%20Case "STL models for cases") 
-- [Components Documentation](https://github.com/AutomationArt/LoraType/tree/main/Documents "Component Documentation")
+- [Components Documentation](https://github.com/AutomationArt/LoraType/tree/main/Documents "Component Documentation") :fire:
 - [Software Example](https://github.com/AutomationArt/LoraType/tree/main/Software "Software Example")
 - On-line Support

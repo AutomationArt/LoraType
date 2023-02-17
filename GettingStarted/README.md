@@ -21,6 +21,9 @@ For full internal debugging of [JTAG](https://docs.espressif.com/projects/esp-id
 - Using integrated antenna (need to add 2 components ***La | Ca***)
 - Connection of external power generators (Energy harvesters and etc,***Solar input + -***) 
 
+
+[Documentation for all components](https://github.com/AutomationArt/LoraType/tree/main/Documents "Documentation for all components") :arrow_left:   
+
 ------------
 
 ### How to Firmware 
