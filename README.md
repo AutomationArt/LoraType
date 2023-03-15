@@ -1,6 +1,6 @@
 [![LoraType](https://raw.githubusercontent.com/AutomationArt/LoraType/main/Image/LoraType.png "LoraType")](https://raw.githubusercontent.com/AutomationArt/LoraType/main/Image/LoraType.png "LoraType")
 
-### LoraType..|
+### LoraType
 Our priority is to make the user experience as simple as possible. It only has an on/off button, a widespread QWERTY-keyboard and a cute e-ink display. That’s it. However, in spite of simplicity the Loratype can be used as a tiny PC with possibility for programming and adding new functions thanks to embedded Wі-Fі, Bluetooth and esp32. Welcome on board and feel like home, dear like-minded fellows!
 
 There are some extra features: the LoRa protocol is noise-resistant, and the communication range is about 1 km in a city and up to 7 km in line-of-sight coverage. And of course it is totally free of charge, Loratype has been created not by a Corporation for population, but by people for people. Thus, in any emergency condition, we will honorably stay together!
@@ -25,7 +25,7 @@ There are some extra features: the LoRa protocol is noise-resistant, and the com
 LoRa contains all the basic building blocks needed and used by any modern wireless technology, and it does so using the AES-128 standard. ([Lora Security](https://lora-alliance.org/wp-content/uploads/2020/11/lorawan_security_whitepaper.pdf "Lora Security"))
 
 ------------
-### We have gone through several important stages of product development, which is very important.
+### We have gone through several important stages of product development.
 
 [![LoraType](https://raw.githubusercontent.com/AutomationArt/LoraType/main/Image/LoraType_v1tov2.png "LoraTypePCB")](https://raw.githubusercontent.com/AutomationArt/LoraType/main/Image/LoraType_v1tov2.png "LoraTypePCB")
 
@@ -58,10 +58,10 @@ LoRa contains all the basic building blocks needed and used by any modern wirele
 [![LoraTypeForDiy](https://raw.githubusercontent.com/AutomationArt/LoraType/main/Image/LoraType_ForDIY.png "LoraTypeForDiy")](https://raw.githubusercontent.com/AutomationArt/LoraType/main/Image/LoraType_ForDIY.png "LoraTypeForDiy")
 
 **For device owners, the ability to add DIY add-ons is available.**
-- Fast firmware (UART)
+- Fast flash firmware (UART)
 - Adding your own sensors to the device (via I2C bus)
 - JTAG debugging
-- Li-po battery change
+- Replaceable battery (Li-po)
 - Using integrated antenna
 - Connection of external power generators (Energy harvesters)
 
