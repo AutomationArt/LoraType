@@ -1492,7 +1492,7 @@ void setup()
 
 	MenuHeader("LoraType");
 
-	Wire.begin(PinSDA, PinSCL, 100000);
+	Wire.begin(PinSDA, PinSCL, (uint32_t)100000);
 	delay(200);
 
 	key_matrix.begin();
