@@ -1,6 +1,5 @@
 #include "main.h"
 
-
 /** Task to handle mesh */
 TaskHandle_t meshTaskHandle = NULL;
 
@@ -19,7 +18,7 @@ uint32_t broadcastID;
 mapMsg syncMsg;
 
 /** Max number of messages in the queue */
-#define SEND_QUEUE_SIZE 2 //2	
+#define SEND_QUEUE_SIZE 2 // 2
 /** Send buffer for SEND_QUEUE_SIZE messages */
 dataMsg sendMsg[SEND_QUEUE_SIZE];
 /** Message size buffer for SEND_QUEUE_SIZE messages */
@@ -34,14 +33,14 @@ portMUX_TYPE accessMsgQueue = portMUX_INITIALIZER_UNLOCKED;
 SemaphoreHandle_t accessNodeList;
 
 /** LoRa TX package */
-uint8_t txPckg[256];  //256	
+uint8_t txPckg[256]; // 256
 /** Size of data package */
 uint16_t txLen = 0;
 /** LoRa RX buffer */
-uint8_t rxBuffer[256];  //256
+uint8_t rxBuffer[256]; // 256
 
 /** Sync time for routing at start */
-#define INIT_SYNCTIME 30000	
+#define INIT_SYNCTIME 30000
 /** Sync time for routing after mesh has settled */
 #define DEFAULT_SYNCTIME 60000 // 60000
 /** Time to switch from INIT_SYNCTIME to DEFAULT_SYNCTIME */
@@ -65,7 +64,7 @@ time_t syncTime = INIT_SYNCTIME;
  */
 // #define RX_SLEEP_TIMES 2 * 512 * 1000 * 15.625, 10 * 512 * 1000 * 15.625
 
-#define RX_SLEEP_TIMES 2 * 4096 * 1000 * 15.625, 10 *  4096 * 1000 * 15.625
+#define RX_SLEEP_TIMES 2 * 4096 * 1000 * 15.625, 10 * 4096 * 1000 * 15.625
 
 typedef enum
 {
@@ -102,6 +101,8 @@ boolean nodesChanged = false;
  */
 void initMesh(MeshEvents_t *events, int numOfNodes)
 {
+
+
 	_MeshEvents = events;
 	// Initialize the callbacks
 	RadioEvents.TxDone = OnTxDone;
@@ -159,15 +160,34 @@ void initMesh(MeshEvents_t *events, int numOfNodes)
 	broadcastID = deviceID & 0xFFFFFF00;
 	myLog_d("Broadcast ID is %08X", broadcastID);
 
+	int32_t set_rf_frequency=0;
+	int32_t set_tx_output_power = 0;			
+	int32_t set_lora_spreading_factor = 0;			
+	int32_t set_lora_codingrate = 0;			
+	int32_t set_lora_bandwidth = 0;		
+
+	Preferences prefLora;
+	prefLora.begin("LoraSettings", false);
+
+	set_rf_frequency = prefLora.getInt("rf_frequency", 868200000);		  // 
+	set_tx_output_power = prefLora.getInt("tx_output_power", 14);				  // tx_output_power=14;
+	set_lora_spreading_factor = prefLora.getInt("lora_spreading", 12); // lora_spreading_factor=12
+	set_lora_codingrate = prefLora.getInt("lora_codingrate", 1);			  // lora_codingrate=12
+	set_lora_bandwidth = prefLora.getInt("lora_bandwidth", 1);				  // lora_bandwidth=1
+
+	prefLora.end();
+
+
+
 	// Put LoRa into standby
 	Radio.Standby();
 
 	// Set Frequency
-	Radio.SetChannel(RF_FREQUENCY);
+	Radio.SetChannel(set_rf_frequency);
 
 	// Set transmit configuration
-	Radio.SetTxConfig(MODEM_LORA, TX_OUTPUT_POWER, 0, LORA_BANDWIDTH,
-					  LORA_SPREADING_FACTOR, LORA_CODINGRATE,
+	Radio.SetTxConfig(MODEM_LORA, set_tx_output_power, 0, set_lora_bandwidth,
+					  set_lora_spreading_factor, set_lora_codingrate,
 					  LORA_PREAMBLE_LENGTH, LORA_FIX_LENGTH_PAYLOAD_ON,
 					  true, 0, 0, LORA_IQ_INVERSION_ON, TX_TIMEOUT_VALUE);
 	// Set receive configuration
@@ -175,7 +195,7 @@ void initMesh(MeshEvents_t *events, int numOfNodes)
 					  LORA_CODINGRATE, 0, LORA_PREAMBLE_LENGTH,
 					  LORA_SYMBOL_TIMEOUT, LORA_FIX_LENGTH_PAYLOAD_ON,
 					  0, true, 0, 0, LORA_IQ_INVERSION_ON, true);
- 
+
 	// Create message queue for LoRa
 	meshMsgQueue = xQueueCreate(10, sizeof(uint8_t));
 	if (meshMsgQueue == NULL)
@@ -415,7 +435,7 @@ void OnRxDone(uint8_t *rxPayload, uint16_t rxSize, int16_t rxRssi, int8_t rxSnr)
 			// Mapping received
 			uint8_t subsSize = tempSize - MAP_HEADER_SIZE;
 			uint8_t numSubs = subsSize / 5;
- 
+
 			// Serial.println("********************************");
 			// for (int idx = 0; idx < tempSize; idx++)
 			// {

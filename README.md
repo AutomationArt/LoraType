@@ -104,3 +104,6 @@ Built-in radio module (SX1262) allows additional various radio communication met
 - [Components Documentation](https://github.com/AutomationArt/LoraType/tree/main/Documents "Component Documentation") :fire:
 - [Software Example](https://github.com/AutomationArt/LoraType/tree/main/Software "Software Example")
 - On-line Support
+- [Instagram](https://www.instagram.com/automation_art "Instagram") | [Fosstodon](https://fosstodon.org/@loratype "Fosstodon")
+
+<a rel="me" href="https://fosstodon.org/@loratype">Fosstodon</a>        

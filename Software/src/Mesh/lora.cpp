@@ -105,7 +105,7 @@ bool initLoRa(void)
 #endif
 	uint16_t readSyncWord = 0;
 	SX126xReadRegisters(REG_LR_SYNCWORD, (uint8_t *)&readSyncWord, 2);
-	myLog_w("Got syncword %X", readSyncWord);
+	myLog_w("Got syncword %X", readSyncWord);							
 
 	MeshEvents.DataAvailable = OnLoraData;
 	MeshEvents.NodesListChanged = onNodesListChange;

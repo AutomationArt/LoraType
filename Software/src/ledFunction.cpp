@@ -204,7 +204,7 @@ int LedSystemStart()
 
 	for (int i = 0; i < 20; i++)
 	{
-		delay(10);
+		vTaskDelay(10/portTICK_PERIOD_MS);
 		pixels.setBrightness(i);
 		pixels.setPixelColor(0, pixels.Color(255, 160, 16));
 		pixels.show();
@@ -212,7 +212,7 @@ int LedSystemStart()
 
 	for (int i = 20; i > 0; i--)	
 	{
-		delay(10);
+		vTaskDelay(10/portTICK_PERIOD_MS);
 		pixels.setBrightness(i);
 		pixels.setPixelColor(0, pixels.Color(255, 160, 16));
 		pixels.show();

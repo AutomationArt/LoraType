@@ -1,0 +1,37 @@
+# Syntax Colouring Map For Adafruit_TCA8418
+
+# Data types (KEYWORD1)
+Adafruit_TCA8418	KEYWORD1
+
+# Methods and Functions (KEYWORD2)
+begin	KEYWORD2
+
+matrix	KEYWORD2
+available	KEYWORD2
+getEvent	KEYWORD2
+flush	KEYWORD2
+
+digitalRead	KEYWORD2
+digitalWrite	KEYWORD2
+pinMode	KEYWORD2
+pinIRQMode	KEYWORD2
+
+enableInterrupts	KEYWORD2
+disableInterrupts	KEYWORD2
+
+enableMatrixOverflow	KEYWORD2
+disableMatrixOverflow	KEYWORD2
+
+enableDebounce	KEYWORD2
+disableDebounce	KEYWORD2
+
+readRegister	KEYWORD2
+writeRegister	KEYWORD2
+
+
+# Constants (LITERAL1)
+TCA8418_DEFAULT_ADDR	LITERAL1
+TCA8418_ROW0	LITERAL1
+
+# todo
+

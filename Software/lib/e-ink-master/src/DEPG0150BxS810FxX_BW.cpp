@@ -22,7 +22,7 @@ int DEPG0150BxS810FxX_BW::EPD_Init(void) {
   SendCommand(0x12); // 软件复位    soft  reset
   WaitUntilIdle();
   
-  Serial.println("e-Paper init OK!");	
+ return 0;	
 }
 
 

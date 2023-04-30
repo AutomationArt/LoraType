@@ -60,7 +60,7 @@ int EpdBase::IfInit(void) {
   pinMode(this->reset_pin, OUTPUT);
   pinMode(this->dc_pin, OUTPUT);
   pinMode(this->busy_pin, INPUT); 
-  SPI.beginTransaction(SPISettings(2000000, MSBFIRST, SPI_MODE0));
-  SPI.begin();
+  SPI.beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE0));
+  SPI.begin();              
   return 0;
 }
