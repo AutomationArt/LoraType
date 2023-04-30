@@ -1331,7 +1331,7 @@ int chatGenDraw(uint8_t Upd = 0)
 		{
 			inkStr[g] = "";
 		}
-		// Берем каждое сообщение
+
 		for (int t = 0; t < countMessage; t++)
 		{
 			if (GenChat[t].OnLora_fromID != 0)
@@ -1347,18 +1347,17 @@ int chatGenDraw(uint8_t Upd = 0)
 					who = String(outputString) + ":";
 				}
 
-				// сообщение полностью с id
+		
 				msgPrint = who + GenChat[t].message + "-" + String(GenChat[t].OnLora_rxRssi) + "-" + String(GenChat[t].OnLora_rxSnr);
 				uint16_t lenmsg = msgPrint.length();
-				uint8_t howStr = (int)(lenmsg / 27) + 1; // количество строк занимаемое сообщением
+				uint8_t howStr = (int)(lenmsg / 27) + 1; 
 
-				allstrCounter += howStr; // Добавление общего количества строк
+				allstrCounter += howStr; 
 				if (allstrCounter >= countinskStr)
 				{
 					allstrCounter = countinskStr;
 				}
 
-				// 2
 				if (howStr > 1)
 				{
 
@@ -1642,9 +1641,7 @@ void setup()
 		pt.DrawHorizontalLine(75, 55, 15, COLORED);
 		pt.DrawLine(90, 55, 110, 70, COLORED);
 		pt.DrawStringAt(10, 80, "Welcome!", &Font12, COLORED);
-		*/
-	/*=========================Установка клавиатуры=========*/
-
+		*/					
 	/*==============================Lora=======================*/
 	// Create node ID
 	uint8_t deviceMac[8];
