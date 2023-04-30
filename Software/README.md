@@ -2,9 +2,8 @@
 
 ### LoraType Now  v2.0.2
 
-### Latest changes
+### Latest changes 2.0.2
 
-2.0.2
 **- Changed**
 1. 	Changed the approach of working with the keyboard. The method of polling the keyboard is changed to interrupt operation.
 2. Removed unused variables and functions
@@ -18,7 +17,7 @@
 10. Added notification window (without windows, of course)
 11. Changed the work with the general menu for general understanding (still not optimal)
 
-### Future planned changes
+**-  Future planned changes ** 
 1. Evasion of confirmation when requesting firmware. The server requires confirmation of the device to enter the device pool to update, this must be confirmed manually, it is not a decentralized solution depending on the update server.
 2. Return capital letters on the keyboard
 3. Individual chat and on-air #tags are not available at the moment, but the functionality does exist.
