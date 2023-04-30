@@ -17,12 +17,11 @@
 10. Added notification window (without windows, of course)
 11. Changed the work with the general menu for general understanding (still not optimal)
 
-**-  Future planned changes ** 
+**-  Future planned changes** 
 1. Evasion of confirmation when requesting firmware. The server requires confirmation of the device to enter the device pool to update, this must be confirmed manually, it is not a decentralized solution depending on the update server.
 2. Return capital letters on the keyboard
 3. Individual chat and on-air #tags are not available at the moment, but the functionality does exist.
 4. The LED does not support control at less than 80mhz - this is a hardware solution, but if the frequency is less, there is no need to use the LED - economy mode. Implement LED shutdown at lower frequency, may hang up.
 5. Sleep mode, which is turned on manually or activated by pressing on the keyboard of the device, and wakes up when you receive Lora messages. We have already tested this, but the library did not allow to implement it.
 
-
-** Always open to your suggestions, because we are an open project for people. **
+**Always open to your suggestions, because we are an open project for people.** 
