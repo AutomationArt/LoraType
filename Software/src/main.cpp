@@ -1,6 +1,7 @@
 /*
 LORATYPE...|
 https://fosstodon.org/@loratype
+https://lora.readthedocs.io/en/latest
 */
 
 #include "main.h"
@@ -11,7 +12,7 @@ https://fosstodon.org/@loratype
 #define PINGADR "95.216.56.89"
 #define FIRMVERS "2.0.2"
 
-// #define selfBroadMessaging 		
+// #define selfBroadMessaging
 
 #define COLORED 0
 #define UNCOLORED 1
@@ -27,7 +28,7 @@ volatile bool TCA8418_event = false;
 void TCA8418_irq()
 {
 	TCA8418_event = true;
-	ESP_LOGD("KEYPAD", "IRQ work");
+	// ESP_LOGD("KEYPAD", "IRQ work");
 }
 
 enum keyServ
@@ -214,17 +215,33 @@ int db_printIndALL();														 // Output to the logs of all individual chat
 int db_addGenMessage(uint32_t, String, uint16_t, int16_t, int8_t);			 // Add message to structure-database
 int db_addIndMessage(uint32_t, uint32_t, String, uint16_t, int16_t, int8_t); // Return the currently pressed button
 void OnLoraData(uint32_t, uint8_t, uint16_t, int16_t, int8_t);				 // Callback message on LORA
-void onNodesListChange(void);												 // Callback when Node list Changed every 30 sec
-String getBattery();														 // Get the battery charge as a percentage
-String getVoltage();														 // Get the battery voltage
-String getConfirmCode(String);												 // Confirmation code processing (in text)
-int loraSendConfirm(uint32_t, String);										 // Sending a confirmation in individual chat
+void onNodesListChange(void);
+String getLoraQualitySignal(int16_t, int16_t); // Callback when Node list Changed every 30 sec
+String getBattery();						   // Get the battery charge as a percentage
+String getVoltage();						   // Get the battery voltage
+String getConfirmCode(String);				   // Confirmation code processing (in text)
+int loraSendConfirm(uint32_t, String);		   // Sending a confirmation in individual chat
 int tagSingleDraw(String, uint8_t);
 int symCheck(byte);						 // Check the pressed button for the relation to the service buttons
 int PrintFreeHeap();					 // Print free heap in device
 int alertWindow(const char, const char); // alert window, without windows, of course.
 bool CounterUsersUpdater();				 // Print counter all users in mesh
 void onUpdateProgress(uint8_t, uint8_t); // Firmware upgrade process
+
+String getLoraQualitySignal(int16_t SNR, int16_t RSSI)
+{
+	//((SNR - SNR_min) / (SNR_max - SNR_min) + (RSSI - RSSI_min) / (RSSI_max - RSSI_min)) / 2 * 100
+	// If RSSI=-30dBm: signal is strong.
+	// If RSSI=-120dBm: signal is weak.
+	// RSSI min = -130
+	// RSSI max = -20
+	// SNR min = -20
+	// SNR max = 30
+
+	// ((SNR + 20) / 50 + (RSSI + 130) / 110) / 2 * 100)
+	ESP_LOGD("LORA", "%d %d", SNR, RSSI);
+	return String((((SNR + 20) / 50) + ((RSSI + 130) / 110)) / 2);
+}
 
 int drawSetFreq(String ffrq = "")
 {
@@ -267,8 +284,9 @@ int drawSetOpMode(uint8_t mode_set, int16_t data_set[7][6])
 	if (data_set[mode_set][2] == 1)
 	{
 		tempTextSet = "Coding rate: 4/5";
-		
-	} else {
+	}
+	else
+	{
 		tempTextSet = "Coding rate: 2";
 	}
 	pt.DrawStringAt(10, 135, tempTextSet.c_str(), &Font12, COLORED);
@@ -800,7 +818,7 @@ int db_printGenALL()
 }
 
 int db_printIndALL()
-{			
+{
 	for (uint8_t g = 30; g >= 0; g--)
 	{
 		ESP_LOGD("DATABASE", "%d: %d - %d - %s - %d - %d - %d - %d - %d", g, IndChat[g].OnLora_fromID,
@@ -814,7 +832,7 @@ int db_printIndALL()
 
 int db_addTag(String tagNow)
 {
-	for (uint8_t i = 0; i < countTags - 1; i++) 
+	for (uint8_t i = 0; i < countTags - 1; i++)
 	{
 		if (tagNow == AllTag[i].tag)
 		{
@@ -916,7 +934,7 @@ void onNodesListChange(void)
 int MenuDraw()
 {
 	pt.DrawFilledRectangle(0, 11, 200, 200, UNCOLORED);
-	for (int i = 0; i <= menuCount-1; i++)		
+	for (int i = 0; i <= menuCount - 1; i++)
 	{
 		pt.DrawStringAt(20, 25 + (i * 15), menuAll[i].itemName, &Font12, COLORED);
 	}
@@ -1048,7 +1066,7 @@ int MenuDrawLoraSet()
 
 		tmpPrint = "SF: " + String(print_lora_spreading_factor);
 		pt.DrawStringAt(10, 75, tmpPrint.c_str(), &Font12, COLORED);
-	
+
 		if (print_lora_codingrate == 1)
 		{
 			tmpPrint = "C/R: 4/5"; // 1: 4/5, 2: 4/6, 3: 4/7, 4: 4/8
@@ -1080,7 +1098,7 @@ bool CounterUsersUpdater()
 {
 	if (lastNumElements != numElements)
 	{
-		String allnum = "Users:" + String(numElements);
+		String allnum = "On:" + String(numElements);
 		pt.DrawFilledRectangle(0, 0, 40, 10, COLORED);
 		pt.DrawStringAt(2, 0, allnum.c_str(), &Font12, UNCOLORED);
 		lastNumElements = numElements;
@@ -1347,12 +1365,15 @@ int chatGenDraw(uint8_t Upd = 0)
 					who = String(outputString) + ":";
 				}
 
-		
-				msgPrint = who + GenChat[t].message + "-" + String(GenChat[t].OnLora_rxRssi) + "-" + String(GenChat[t].OnLora_rxSnr);
+				//	msgPrint = who + GenChat[t].message + "(" + String(GenChat[t].OnLora_rxRssi) + "/" + String(GenChat[t].OnLora_rxSnr+")");
+				// ESP_LOGD("LORA QA", "%s", getLoraQualitySignal(GenChat[t].OnLora_rxSnr, GenChat[t].OnLora_rxRssi));
+				// msgPrint = who + GenChat[t].message + "-" + getLoraQualitySignal(GenChat[t].OnLora_rxSnr,GenChat[t].OnLora_rxRssi) + "%";
+				msgPrint = who + GenChat[t].message;
+	
 				uint16_t lenmsg = msgPrint.length();
-				uint8_t howStr = (int)(lenmsg / 27) + 1; 
+				uint8_t howStr = (int)(lenmsg / 27) + 1;
 
-				allstrCounter += howStr; 
+				allstrCounter += howStr;
 				if (allstrCounter >= countinskStr)
 				{
 					allstrCounter = countinskStr;
@@ -1641,7 +1662,7 @@ void setup()
 		pt.DrawHorizontalLine(75, 55, 15, COLORED);
 		pt.DrawLine(90, 55, 110, 70, COLORED);
 		pt.DrawStringAt(10, 80, "Welcome!", &Font12, COLORED);
-		*/					
+		*/
 	/*==============================Lora=======================*/
 	// Create node ID
 	uint8_t deviceMac[8];
@@ -1685,7 +1706,19 @@ void setup()
 	}
 	pt.DrawStringAt(10, 155, output.c_str(), &Font12, COLORED);
 
-	pt.DrawStringAt(10, 180, "Let's start.. Press MENU", &Font12, COLORED);
+	if (pref.begin("LoraSettings", false))
+	{
+		double freq = pref.getInt("rf_frequency", 0) / 1000000;
+		output = "Lora Frequency: " + String(freq) + "mHz";
+		pref.end();
+	}
+	else
+	{
+		ESP_LOGD("PREFERENCES", "FAIL get lora settings");
+	}
+	pt.DrawStringAt(10, 170, output.c_str(), &Font12, COLORED);
+
+	pt.DrawStringAt(10, 185, "Let's start.. Press MENU", &Font12, COLORED);
 
 	drawUpdate();
 	// delay(100);
@@ -1825,8 +1858,9 @@ void loop()
 				MenuDrawArow(menuNowSelect);
 				drawUpdate();
 			}
-			else if (MenuNow() == menuList::EVERYTHING || MenuNow() == menuList::USERS) // adding simbol to outmessage
+			else if (MenuNow() == menuList::EVERYTHING) // We are in the main chat
 			{
+
 				if (symCheck(keyNow) == 0)
 				{
 					if (isCtrlActive)
@@ -1842,11 +1876,9 @@ void loop()
 					chatDrawOutmess();
 					drawUpdate();
 				}
-			}
-			else if (MenuNow() == menuList::EVERYTHING) // We are in the main chat
-			{
-				if (keyNow == keyServ::keyENTER)
+				else if (keyNow == keyServ::keyENTER)
 				{
+					ESP_LOGD("LORA", "Send message in everything chat");
 					if (outMessage.length() >= 3)
 					{
 						if (!loraSendBroadcast(outMessage))
@@ -1866,6 +1898,11 @@ void loop()
 					{
 						LedSystemWarning();
 					}
+				}
+				else if (keyNow == keyServ::keyBACKSPACE)
+				{
+					outMessage.remove(outMessage.length() - 1, 1);
+					chatDrawOutmess();
 				}
 				else if (keyNow == keyServ::keyUP)
 				{
@@ -1907,11 +1944,6 @@ void loop()
 					MenuDrawArow(menuNowSelect);
 					drawUpdate();
 				}
-			}
-			else if (MenuNow() == menuList::EVERYTHING || MenuNow() == menuList::USERS && keyNow == keyServ::keyBACKSPACE) // backspace in chats
-			{
-				outMessage.remove(outMessage.length() - 1, 1);
-				chatDrawOutmess();
 			}
 			else if (MenuNow() == menuList::MAINMENU && keyNow == keyServ::keyOKCenter && menuNowSelect == menuList::LORASETTINGS)
 			{
@@ -2170,7 +2202,7 @@ void loop()
 		}
 		else
 		{
-			ESP_LOGD("KEYPAD", "Release");
+			//	ESP_LOGD("KEYPAD", "Release");
 			keyNow &= 0x7F;
 			keyNow--;
 			if (keyNow == keyServ::keyCTRL)
@@ -2180,57 +2212,57 @@ void loop()
 			}
 			PRFlag = false;
 		}
+	}
 
 #ifdef selfBroadMessaging
-		if (numElements > 0 && isGenChat && (millis() - sendBrodcast) >= (30000 + random(100, 5000)))
-		{
-			loraSendBroadcast(selfText[random(0, 19)]);
-			chatGenDraw();
-			drawUpdate();
-			sendBrodcast = millis();
-		}
+	if (numElements > 0 && isGenChat && (millis() - sendBrodcast) >= (30000 + random(100, 5000)))
+	{
+		loraSendBroadcast(selfText[random(0, 19)]);
+		chatGenDraw();
+		drawUpdate();
+		sendBrodcast = millis();
+	}
 #endif
-
-		if ((millis() - sendRandom) >= 15000)
+	if ((millis() - sendRandom) >= 20000)
+	{
+		if (CounterUsersUpdater())
 		{
-			if (CounterUsersUpdater())
-			{
-				drawUpdate();
-			}
-			sendRandom = millis();
+			ESP_LOGD("LORA USERS", "Counter Update");
+			drawUpdate();
 		}
-						
-		if ((millis() - itwork) >= 10000)
+		sendRandom = millis();
+	}
+
+	if ((millis() - itwork) >= 10000)
+	{
+		heartLed();
+		// Bad idea)))))
+		/*  pt.DrawCircle(194, 17, 3, COLORED);
+		  pt.DrawFilledCircle(194, 17, 2, (int)workFlag);
+		  workFlag = !workFlag;
+		  drawUpdate();
+		*/
+		itwork = millis();
+	}
+
+	if (nodesListChanged)
+	{
+		//  Nodes list changed, update display and report it
+		nodesListChanged = false;
+		if (xSemaphoreTake(accessNodeList, (TickType_t)1000) == pdTRUE)
 		{
-			heartLed();
-			// Bad idea)))))
-			/*  pt.DrawCircle(194, 17, 3, COLORED);
-			  pt.DrawFilledCircle(194, 17, 2, (int)workFlag);
-			  workFlag = !workFlag;
-			  drawUpdate();
-			*/
-			itwork = millis();
+			numElements = numOfNodes();
+			for (int idx = 0; idx < numElements; idx++)
+			{
+				getNode(idx, nodeId[idx], firstHop[idx], numHops[idx]);
+			}
+			xSemaphoreGive(accessNodeList);
+
+			ESP_LOGD("LORA", "%d nodes in the map. My node #01 id: %08X ", numElements + 1, deviceID);
 		}
-
-		if (nodesListChanged)
+		else
 		{
-			//  Nodes list changed, update display and report it
-			nodesListChanged = false;
-			if (xSemaphoreTake(accessNodeList, (TickType_t)1000) == pdTRUE)
-			{
-				numElements = numOfNodes();
-				for (int idx = 0; idx < numElements; idx++)
-				{
-					getNode(idx, nodeId[idx], firstHop[idx], numHops[idx]);
-				}
-				xSemaphoreGive(accessNodeList);
-
-				ESP_LOGD("LORA", "%d nodes in the map. My node #01 id: %08X ", numElements + 1, deviceID);
-			}
-			else
-			{
-				ESP_LOGD("LORA", "Could not access the nodes list");
-			}
+			ESP_LOGD("LORA", "Could not access the nodes list");
 		}
 	}
 }

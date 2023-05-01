@@ -23,14 +23,14 @@ int blinkLed()
 		pixels.setBrightness(i);
 		pixels.setPixelColor(0, pixels.Color(253, 166, 0));
 		pixels.show();
-		delay(5);
+		vTaskDelay(5 / portTICK_PERIOD_MS);
 	}
 	for (uint8_t i = 20; i <= 0; i--)
 	{
 		pixels.setBrightness(i);
 		pixels.setPixelColor(0, pixels.Color(253, 166, 0));
 		pixels.show();
-		delay(5);
+		vTaskDelay(5 / portTICK_PERIOD_MS);
 	}
 
 	pixels.setPixelColor(0, pixels.Color(0, 0, 0));
@@ -44,7 +44,7 @@ int heartLed()
 	pixels.clear();
 	for (int i = 0; i < 4; i++)
 	{
-		delay(20);
+		vTaskDelay(20 / portTICK_PERIOD_MS);
 		pixels.setBrightness(i);
 		pixels.setPixelColor(0, pixels.Color(128, 128, 128));
 		pixels.show();
@@ -52,7 +52,7 @@ int heartLed()
 
 	for (int i = 4; i > 0; i--)
 	{
-		delay(20);
+		vTaskDelay(20 / portTICK_PERIOD_MS);
 		pixels.setBrightness(i);
 		pixels.setPixelColor(0, pixels.Color(128, 128, 128));
 		pixels.show();
@@ -73,18 +73,18 @@ int LedSystemWarning()
 
 		pixels.setPixelColor(0, pixels.Color(253, 166, 0));
 		pixels.show();
-		delay(3);
+		vTaskDelay(3 / portTICK_PERIOD_MS);
 	}
 	for (uint8_t i = maxLedWarnBrightness; i <= 0; i--)
 	{
 		pixels.setBrightness(i);
 		pixels.setPixelColor(0, pixels.Color(253, 166, 0));
 		pixels.show();
-		delay(3);
+		vTaskDelay(3 / portTICK_PERIOD_MS);
 	}
 
 	pixels.setPixelColor(0, pixels.Color(0, 0, 0));
-	delay(3);
+	vTaskDelay(3 / portTICK_PERIOD_MS);
 	pixels.show();
 
 	return 0;
@@ -114,14 +114,14 @@ int LedLoraWarning(bool state = false)
 		pixels.setBrightness(i);
 		pixels.setPixelColor(0, pixels.Color(r, g, b));
 		pixels.show();
-		delay(3);
+		vTaskDelay(3 / portTICK_PERIOD_MS);
 	}
 	for (uint8_t i = maxLedWarnBrightness; i <= 0; i--)
 	{
 		pixels.setBrightness(i);
 		pixels.setPixelColor(0, pixels.Color(r, g, b));
 		pixels.show();
-		delay(3);
+		vTaskDelay(3 / portTICK_PERIOD_MS);
 	}
 
 	pixels.setPixelColor(0, pixels.Color(0, 0, 0));
@@ -138,14 +138,14 @@ int LedUpperCase(bool state)
 		pixels.clear();
 		pixels.setBrightness(10);
 		pixels.setPixelColor(0, pixels.Color(255, 255, 255));
-		delay(5);
+		vTaskDelay(5 / portTICK_PERIOD_MS);
 		pixels.show();
 	}
 	else
 	{
 		pixels.clear();
 		pixels.setPixelColor(0, pixels.Color(0, 0, 0));
-		delay(5);
+		vTaskDelay(5 / portTICK_PERIOD_MS);
 		pixels.show();
 	}
 	return 0;
@@ -174,18 +174,18 @@ int LedLoraInputMess(bool state = false)
 		pixels.setBrightness(i);
 		pixels.setPixelColor(0, pixels.Color(r, g, b));
 		pixels.show();
-		delay(3);
+		vTaskDelay(3 / portTICK_PERIOD_MS);
 	}
 	for (uint8_t i = maxLedWarnBrightness; i <= 0; i--)
 	{
 		pixels.setBrightness(i);
 		pixels.setPixelColor(0, pixels.Color(r, g, b));
 		pixels.show();
-		delay(3);
+		vTaskDelay(3 / portTICK_PERIOD_MS);
 	}
 
 	pixels.setPixelColor(0, pixels.Color(0, 0, 0));
-	delay(3);
+	vTaskDelay(3 / portTICK_PERIOD_MS);
 	pixels.show();
 
 	return 0;
@@ -204,15 +204,15 @@ int LedSystemStart()
 
 	for (int i = 0; i < 20; i++)
 	{
-		vTaskDelay(10/portTICK_PERIOD_MS);
+		vTaskDelay(10 / portTICK_PERIOD_MS);
 		pixels.setBrightness(i);
 		pixels.setPixelColor(0, pixels.Color(255, 160, 16));
 		pixels.show();
 	}
 
-	for (int i = 20; i > 0; i--)	
+	for (int i = 20; i > 0; i--)
 	{
-		vTaskDelay(10/portTICK_PERIOD_MS);
+		vTaskDelay(10 / portTICK_PERIOD_MS);
 		pixels.setBrightness(i);
 		pixels.setPixelColor(0, pixels.Color(255, 160, 16));
 		pixels.show();

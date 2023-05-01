@@ -106,8 +106,8 @@ extern volatile xQueueHandle meshMsgQueue;
 #define LORA_SYMBOL_TIMEOUT 0   // Symbols	
 #define LORA_FIX_LENGTH_PAYLOAD_ON false
 #define LORA_IQ_INVERSION_ON false
-#define RX_TIMEOUT_VALUE 7000
-#define TX_TIMEOUT_VALUE 7000
+#define RX_TIMEOUT_VALUE 5000
+#define TX_TIMEOUT_VALUE 5000
 
 struct nodesList
 {
