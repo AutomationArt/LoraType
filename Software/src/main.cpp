@@ -8,14 +8,6 @@ https://lora.readthedocs.io/en/latest
 #include "ledFunction.h"
 
 /*OTA Drive*/
-#define APIKEY "*****************************"
-#define PINGADR "95.216.56.89"
-#define FIRMVERS "2.0.2"
-
-// #define selfBroadMessaging
-
-#define COLORED 0
-#define UNCOLORED 1
 
 bool stateUpdate = false;
 Preferences pref;
@@ -187,16 +179,17 @@ int8_t menuHis[5], menuNow = -1;
 bool isIndChat = false, isGenChat = false, isTagsView = false, isCtrlActive = false;
 byte menuNowSelect = 0;
 
-bool initLoRa(void);														 // start
-int drawUpdate();															 // Print to display
-int drawAbout();															 // Add about information
-int drawSetOpMode(uint8_t, int16_t);										 // Draw information about the selected communication quality
-int drawSetFreq(String);													 // Draw the CPU frequency settings
-int chatSingleDraw(uint32_t, uint8_t);										 // Print single Chat 1:1
-int chatGenDraw(uint8_t);													 // Chat where is all users in mesh
-int chatDrawOutmess();														 // Draw a string with a message to send in chat
-int loraSendBroadcast(String);												 // Send message to all
-int loraSendMessage(unsigned long, String);									 // Send message to user
+bool initLoRa(void);				   // start
+int drawUpdate();					   // Print to display
+int drawAbout();					   // Add about information
+int drawSetOpMode(uint8_t, int16_t);   // Draw information about the selected communication quality
+int drawSetFreq(String);			   // Draw the CPU frequency settings
+int chatSingleDraw(uint32_t, uint8_t); // Print single Chat 1:1
+int chatGenDraw(uint8_t);			   // Chat where is all users in mesh
+int chatDrawOutmess();				   // Draw a string with a message to send in chat
+int loraSendBroadcast(String);		   // Send message to all
+int loraSendMessage(uint32_t, String); // Send message to user
+int loraSendConfirm(uint32_t, String);
 int MenuDraw();																 // Draw all menu
 int MenuAllUserDraw(uint8_t, uint8_t);										 // Display a list of users who are in a mesh network
 int MenuDrawArow(uint8_t);													 // Draw arrow in all menu
@@ -214,7 +207,8 @@ int db_printGenALL();														 // Output to the logs of all messages in gen
 int db_printIndALL();														 // Output to the logs of all individual chat that are stored
 int db_addGenMessage(uint32_t, String, uint16_t, int16_t, int8_t);			 // Add message to structure-database
 int db_addIndMessage(uint32_t, uint32_t, String, uint16_t, int16_t, int8_t); // Return the currently pressed button
-void OnLoraData(uint32_t, uint8_t, uint16_t, int16_t, int8_t);				 // Callback message on LORA
+int db_getCountInputMessages(uint32_t, bool);
+void OnLoraData(uint32_t, uint8_t, uint16_t, int16_t, int8_t); // Callback message on LORA
 void onNodesListChange(void);
 String getLoraQualitySignal(int16_t, int16_t); // Callback when Node list Changed every 30 sec
 String getBattery();						   // Get the battery charge as a percentage
@@ -608,9 +602,8 @@ int symCheck(byte keyCheck)
 bool caseUpperFlag = false;
 uint8_t keyboardColl = 0, keyboardRow = 0;
 
-int loraSendConfirm(unsigned long userMesh, String messKey)
+int loraSendConfirm(uint32_t userMesh, String messKey)
 {
-
 	if (xSemaphoreTake(accessNodeList, (TickType_t)1000) == pdTRUE)
 	{
 		numElements = numOfNodes();
@@ -668,7 +661,7 @@ int loraSendConfirm(unsigned long userMesh, String messKey)
 	return 0;
 }
 
-int loraSendMessage(unsigned long userMesh, String msgData)
+int loraSendMessage(uint32_t userMesh, String msgData)
 {
 	if (xSemaphoreTake(accessNodeList, (TickType_t)1000) == pdTRUE)
 	{
@@ -676,7 +669,6 @@ int loraSendMessage(unsigned long userMesh, String msgData)
 		if (numOfNodes() >= 1)
 		{
 			getRoute(userMesh, &routeToNode);
-
 			xSemaphoreGive(accessNodeList);
 			outData.mark1 = 'L';
 			outData.mark2 = 'o';
@@ -724,7 +716,6 @@ int loraSendMessage(unsigned long userMesh, String msgData)
 			if (!addSendRequest(&outData, dataLen))
 			{
 				LedLoraWarning(false);
-
 				ESP_LOGD("LORA", "Send - fail");
 			}
 			else
@@ -910,7 +901,7 @@ int db_addIndMessage(uint32_t dbfromID, uint32_t dbtoID, String dbrxPayload, uin
 	IndChat[countMessage - 1].message = dbrxPayload;
 
 	ESP_LOGD("LORA", "Message (individual) added");
-	db_printIndALL();
+	// db_printIndALL();
 
 	return 0;
 }
@@ -950,7 +941,7 @@ int MenuDrawArow(uint8_t selected)
 
 	pt.DrawFilledRectangle(0, 24, 19, 200, UNCOLORED);
 	pt.DrawStringAt(3, 25 + (selected * 15), "->", &Font12, COLORED);
-
+	ESP_LOGD("DRAW", "Draw arrow");
 	return 0;
 }
 
@@ -959,6 +950,8 @@ int MenuDrawDistance()
 	// https://sensing-labs.com/f-a-q/a-good-radio-level/
 
 	pt.DrawFilledRectangle(0, 22, 200, 200, UNCOLORED);
+
+	pt.DrawStringAt(20, 25, "(No real-time updates yet)", &Font8, COLORED);
 	pt.DrawVerticalLine(10, 25, 160, COLORED);
 	pt.DrawHorizontalLine(10, 185, 170, COLORED);
 
@@ -971,20 +964,34 @@ int MenuDrawDistance()
 	pt.DrawStringAt(3, 78, "R", &Font8, COLORED);
 
 	pt.DrawStringAt(100, 190, "RSSI", &Font8, COLORED);
+	char line[10];
+	uint8_t xran = 0, yran = 0;
 
 	for (int g = 0; g < numElements; g++)
 	{
+		sprintf(line, "%02X%02X%02X", (uint8_t)(nodeId[g] >> 24), (uint8_t)(nodeId[g] >> 16), (uint8_t)(nodeId[g] >> 8));
+
 		if (abs(dnode[g].rssi) < 115 && abs(dnode[g].snr) < 7) // good
 		{
-			pt.DrawCircle(random(10, 100), random(100, 170), 6, COLORED);
+			xran = random(10, 100);
+			yran = random(100, 170);
+
+			pt.DrawStringAt(xran + 7, yran - 7, line, &Font8, COLORED);
+			pt.DrawCircle(xran, yran, 6, COLORED);
 		}
 		else if ((abs(dnode[g].rssi) >= 115 && abs(dnode[g].rssi) <= 126 && abs(dnode[g].snr) <= 7) || (abs(dnode[g].rssi) <= 115 && abs(dnode[g].snr) >= 7 && abs(dnode[g].snr) <= 15)) // fair
 		{
-			pt.DrawCircle(random(10, 140), random(60, 100), 4, COLORED);
+			xran = random(10, 140);
+			yran = random(60, 100);
+			pt.DrawStringAt(xran + 7, yran - 7, line, &Font8, COLORED);
+			pt.DrawCircle(xran, yran, 4, COLORED);
 		}
 		else if ((abs(dnode[g].rssi) <= 126 && abs(dnode[g].snr) > 15) || (abs(dnode[g].rssi) > 126 && abs(dnode[g].snr) < 15)) // bad
 		{
-			pt.DrawCircle(random(150, 170), random(30, 150), 2, COLORED);
+			xran = random(150, 170);
+			yran = random(30, 150);
+			pt.DrawStringAt(xran + 7, yran - 7, line, &Font8, COLORED);
+			pt.DrawCircle(xran, yran, 2, COLORED);
 		}
 		else // error
 		{
@@ -1167,8 +1174,9 @@ int MenuDrawStatDb()
 	return 0;
 }
 
-int MenuAllUserDraw(uint8_t st = 0, uint8_t fin = 10)
+int MenuAllUserDraw(uint8_t frame = 0, uint8_t index = 0)
 {
+	// // const
 	uint8_t xcoor = 20;
 	pt.DrawFilledRectangle(0, 23, 200, 200, UNCOLORED);
 	// for (int idx = 0; idx < numElements; idx++)
@@ -1180,24 +1188,35 @@ int MenuAllUserDraw(uint8_t st = 0, uint8_t fin = 10)
 	{
 		alertWindow("No user. Press Menu", "Update after 30 sec.");
 	}
-	else if (fin <= numElements)
+	else
 	{
+		ESP_LOGD("USERS", "frame %d  - index %d", frame, index);
 		char line[20];
-		for (int idx = st; idx < fin; idx++)
+
+		uint8_t maxprimntuser = 1;
+
+		if (numElements > 10)
+		{
+			maxprimntuser = (frame * 10) + 10;
+		}
+		else
+		{
+			maxprimntuser = numElements;
+		}
+
+		for (int idx = frame * 10; idx < maxprimntuser; idx++)
 		{
 			if (firstHop[idx] == 0)
 			{
 				// sprintf(line, "%08X", nodeId[idx]);
-				sprintf(line, "%02X%02X%02X", (uint8_t)(nodeId[idx] >> 24), (uint8_t)(nodeId[idx] >> 16), (uint8_t)(nodeId[idx] >> 8));
+				sprintf(line, "%d: %02X%02X%02X%02X (%d/%d)", idx + 1, (uint8_t)(nodeId[idx] >> 24), (uint8_t)(nodeId[idx] >> 16), (uint8_t)(nodeId[idx] >> 8), (uint8_t)(nodeId[idx] >> 0), db_getCountInputMessages(nodeId[idx], true), db_getCountInputMessages(nodeId[idx], false));
 			}
 			else
 			{
 				// sprintf(line, "%08X*", nodeId[idx]);
-				sprintf(line, "%02X%02X%02X*", (uint8_t)(nodeId[idx] >> 24), (uint8_t)(nodeId[idx] >> 16), (uint8_t)(nodeId[idx] >> 8));
+				sprintf(line, "%d: %02X%02X%02X%02X* (%d/%d)", idx + 1, (uint8_t)(nodeId[idx] >> 24), (uint8_t)(nodeId[idx] >> 16), (uint8_t)(nodeId[idx] >> 8), (uint8_t)(nodeId[idx] >> 0), db_getCountInputMessages(nodeId[idx], true), db_getCountInputMessages(nodeId[idx], false));
 			}
-
 			pt.DrawStringAt(xcoor, 25 + (idx * 15), line, &Font12, COLORED);
-
 			if (numElements > 10 && (idx == 10 || idx == 20 || idx == 40))
 			{
 				xcoor += 25;
@@ -1205,6 +1224,37 @@ int MenuAllUserDraw(uint8_t st = 0, uint8_t fin = 10)
 		}
 	}
 	return 0;
+}
+
+int db_getCountInputMessages(uint32_t userid, bool Destination)
+{
+	uint16_t counter = 0;
+	for (uint16_t g = 0; g <= countMessage; g++)
+	{
+		if (Destination)
+		{
+			if (IndChat[g].OnLora_fromID == userid)
+			{
+				counter += 1;
+			}
+		}
+		else
+		{
+
+			if (IndChat[g].OnLora_toID == userid)
+			{
+				counter += 1;
+			}
+		}
+	}
+	if (counter == 0)
+	{
+		return 0;
+	}
+	else
+	{
+		return counter;
+	}
 }
 
 int chatSingleDraw(unsigned int activeUserId, uint8_t Upd = 0)
@@ -1237,29 +1287,19 @@ int chatSingleDraw(unsigned int activeUserId, uint8_t Upd = 0)
 				}
 				else
 				{
-					// char outputString[9];
-					// itoa(IndChat[t].OnLora_fromID, outputString, 16);
-					//	who = String(outputString) + ":";
-					who = "bff:";
+					who = "mf:"; // mesh friend :)
 				}
 
 				if (IndChat[t].confirm)
 				{
-
-					who += "> ";
-				}
-				else
-				{
-
-					who += "- ";
+					who += ">";
 				}
 
-				// сообщение полностью с id
 				msgPrint = who + IndChat[t].message;
 				uint16_t lenmsg = msgPrint.length();
-				uint8_t howStr = (int)(lenmsg / 27) + 1; // количество строк занимаемое сообщением
-
-				allstrCounter += howStr; // Добавление общего количества строк
+				uint8_t howStr = (int)(lenmsg / 27) + 1;
+				
+				allstrCounter += howStr;
 				if (allstrCounter >= countinskStr)
 				{
 					allstrCounter = countinskStr;
@@ -1369,7 +1409,7 @@ int chatGenDraw(uint8_t Upd = 0)
 				// ESP_LOGD("LORA QA", "%s", getLoraQualitySignal(GenChat[t].OnLora_rxSnr, GenChat[t].OnLora_rxRssi));
 				// msgPrint = who + GenChat[t].message + "-" + getLoraQualitySignal(GenChat[t].OnLora_rxSnr,GenChat[t].OnLora_rxRssi) + "%";
 				msgPrint = who + GenChat[t].message;
-	
+
 				uint16_t lenmsg = msgPrint.length();
 				uint8_t howStr = (int)(lenmsg / 27) + 1;
 
@@ -1427,10 +1467,9 @@ int chatGenDraw(uint8_t Upd = 0)
 			if (howmes > 0)
 			{
 				pt.DrawStringAt(0, ypos, inkStr[howmes - Upd].c_str(), &Font12, COLORED);
-				ESP_LOGD("EINK", "%s", inkStr[howmes - Upd]);
+				// ESP_LOGD("EINK", "%s", inkStr[howmes - Upd]);
 			}
 		}
-
 		//	delete[] allTextArray;
 	}
 
@@ -1731,43 +1770,37 @@ void loop()
 	if (OnLoraFlag)
 	{
 		OnLoraFlag = false;
-
 		ESP_LOGD("LORA_Payload_len", "%d", OnLora_rxPayload.length());
 		ESP_LOGD("LORA_Payload", "%s", OnLora_rxPayload);
-
-#ifdef selfBroadMessaging
-		// This adds signal quality data to the messages
-		byte onloraRssi = map(OnLora_rxRssi, -136, -30, 0, 100);
-		OnLora_rxPayload = OnLora_rxPayload + "-" + String(onloraRssi) + "%";
-#endif
-
 		if (OnLora_rxPayload[0] == '@')
 		{
+			ESP_LOGD("LORA", "Payload @");	
 			OnLora_rxPayload.remove(0, 1);
 			for (int i = 0; i < countMessage; i++)
 			{
-
 				ESP_LOGD("LORA", "Confirm %s - Payload %s", IndChat[i].confirmCode, OnLora_rxPayload);
-
 				if (OnLora_rxPayload == IndChat[i].confirmCode)
 				{
-
 					IndChat[i].confirm = true;
 					ESP_LOGD("LORA", "%d - Confirm be added", i);
-
 					break;
 				}
 			}
 		}
 		else if (OnLora_rxPayload[0] == '~')
-		{
+		{	
 			db_addIndMessage(OnLora_rxfromID, 13, OnLora_rxPayload, OnLora_rxSize, OnLora_rxRssi, OnLora_rxSnr);
-			vTaskDelay(500 / portTICK_PERIOD_MS);
+			// vTaskDelay(500 / portTICK_PERIOD_MS);
 			loraSendConfirm(OnLora_rxfromID, getConfirmCode(OnLora_rxPayload));
 			LedLoraInputMess(true);
 		}
 		else
 		{
+#ifdef selfBroadMessaging
+			// This adds signal quality data to the messages
+			byte onloraRssi = map(OnLora_rxRssi, -136, -30, 0, 100);
+			OnLora_rxPayload = OnLora_rxPayload + "-" + String(onloraRssi) + "%";
+#endif
 			db_addGenMessage(OnLora_rxfromID, OnLora_rxPayload, OnLora_rxSize, OnLora_rxRssi, OnLora_rxSnr);
 			LedLoraInputMess(false);
 			ESP_LOGD("LORA", "Add broad. mess");
@@ -1807,7 +1840,6 @@ void loop()
 			byte row = keyNow % 10;
 			ESP_LOGD("k", "%d", keyNow);
 			ESP_LOGD("MenuNow", "%d", MenuNow());
-
 			if (keyNow == keyServ::keyCTRL)
 			{
 				isCtrlActive = true;
@@ -1822,45 +1854,8 @@ void loop()
 				chatGenDraw();
 				drawUpdate();
 			}
-			else if (MenuNow() == menuList::MAINMENU && keyNow == keyServ::keyOKCenter && menuNowSelect == menuList::USERS) // Enter to Users online list
-			{
-				MenuHistory(menuList::USERS);
-				MenuHeader(String(menuAll[menuNowSelect].itemName));
-				MenuAllUserDraw();
-				if (numElements > 0)
-				{
-					MenuDrawArow(0);
-				}
-				drawUpdate();
-			}
-			else if (MenuNow() == menuList::USERS)
-			{
-
-				if (keyNow == keyServ::keyUP)
-				{
-					MenuAllUserDraw(userFrame);
-					drawUpdate();
-				}
-				else if (keyNow == keyServ::keyDOWN)
-				{
-					MenuAllUserDraw(userFrame);
-					drawUpdate();
-				}
-			}
-			else if (keyNow == keyServ::keyMENU) // Main Menu
-			{
-				MenuHistory(-1);
-				isIndChat = false;
-				isGenChat = false;
-				outMessage = "";
-				MenuHeader("Menu");
-				MenuDraw();
-				MenuDrawArow(menuNowSelect);
-				drawUpdate();
-			}
 			else if (MenuNow() == menuList::EVERYTHING) // We are in the main chat
 			{
-
 				if (symCheck(keyNow) == 0)
 				{
 					if (isCtrlActive)
@@ -1879,7 +1874,7 @@ void loop()
 				else if (keyNow == keyServ::keyENTER)
 				{
 					ESP_LOGD("LORA", "Send message in everything chat");
-					if (outMessage.length() >= 3)
+					if (outMessage.length() >= minLenghtOutMessage)
 					{
 						if (!loraSendBroadcast(outMessage))
 						{
@@ -1923,6 +1918,169 @@ void loop()
 					}
 				}
 			}
+			else if (keyNow == keyServ::keyMENU) // Main Menu
+			{
+				MenuHistory(-1);
+				isIndChat = false;
+				isGenChat = false;
+				outMessage = "";
+				MenuHeader("Menu");
+				MenuDraw();
+				MenuDrawArow(menuNowSelect);
+				drawUpdate();
+			}
+			else if (MenuNow() == menuList::MAINMENU && keyNow == keyServ::keyOKCenter && menuNowSelect == menuList::USERS) // Enter to Users online list
+			{
+				MenuHistory(menuList::USERS);
+				MenuHeader(String(menuAll[menuNowSelect].itemName));
+				MenuAllUserDraw();
+				if (numElements > 0)
+				{
+					MenuDrawArow(0);
+				}
+				else
+				{
+					alertWindow("No users found", "Refresh in 30 seconds");
+				}
+				drawUpdate();
+			}
+			else if (MenuNow() == menuList::USERS)
+			{
+				static uint8_t userindex = 0, userFrame = 0, stage = 0;
+
+				ESP_LOGD("KEYPAD_UP", "User frame: %d  |  User Index:  %d  | Stage %d  |  NumElement %d", userFrame, userindex, stage, numElements);
+
+				if (stage == 0)
+				{
+					ESP_LOGD("CHAT IND", " Stage 0");
+					if (keyNow == keyServ::keyUP && userindex > 0)
+					{
+						if (userindex == 0 && (numElements % 10 >= 2))
+						{
+							userFrame -= 1;
+							userindex = 9;
+						}
+						userindex -= 1;
+
+						MenuAllUserDraw(userFrame, userindex);
+						MenuDrawArow(userindex);
+						drawUpdate();
+					}
+					else if (keyNow == keyServ::keyDOWN && userindex <= 10 && userindex < numElements - 1)
+					{
+						if (userindex == 10 && (numElements % 10 >= 2))
+						{
+							userFrame += 1;
+							userindex = 0;
+						}
+						userindex += 1;
+
+						ESP_LOGD("KEYPAD_DOWN", "%d - %d", userFrame, userindex);
+						MenuAllUserDraw(userFrame, userindex);
+						MenuDrawArow(userindex);
+						drawUpdate();
+					}
+					else if (keyNow == keyServ::keyOKCenter)
+					{
+						// start individual chat here
+						stage = 1;
+						isGenChat = false;
+						isIndChat = true;
+						getActiveUser = nodeId[userindex];
+						MenuHeader(String(getActiveUser, HEX));
+						chatSingleDraw(getActiveUser);
+						drawUpdate();
+					}
+				}
+				else if (stage == 1)
+				{
+					ESP_LOGD("CHAT IND", " Stage 1");
+					/*==========================================================*/
+					if (symCheck(keyNow) == 0)
+					{
+						if (isCtrlActive)
+						{
+							outMessage += keySymbCase[col][row];
+						}
+						else
+						{
+							outMessage += keyDownCase[col][row];
+						}
+
+						ESP_LOGD("DRAW", "draw in individual chat");
+						chatDrawOutmess();
+						drawUpdate();
+					}
+					else if (keyNow == keyServ::keyENTER)
+					{
+						ESP_LOGD("LORA", "Send message in individual chat");
+						if (outMessage.length() >= minLenghtOutMessage)
+						{
+							loraSendMessage(getActiveUser, outMessage);
+							outMessage = "";
+							counterResMess = 0;
+							pt.DrawFilledRectangle(3, 181, 197, 197, UNCOLORED);
+							chatSingleDraw(getActiveUser);
+							drawUpdate();
+						}
+						else
+						{
+							LedSystemWarning();
+						}
+					}
+					else if (keyNow == keyServ::keyBACKSPACE)
+					{
+						outMessage.remove(outMessage.length() - 1, 1);
+						chatDrawOutmess();
+					}
+					else if (keyNow == keyServ::keyUP)
+					{
+						if (messFrame < countinskStr && (allstrCounter - 10) > 1)
+						{
+							messFrame++;
+							chatSingleDraw(getActiveUser, messFrame);
+							drawUpdate();
+						}
+					}
+					else if (keyNow == keyServ::keyDOWN)
+					{
+						if (messFrame > 0)
+						{
+							messFrame--;
+							chatSingleDraw(getActiveUser, messFrame);
+							drawUpdate();
+						}
+					}
+					else if (keyNow == keyServ::keyLEFT)
+					{
+						ESP_LOGD("KEYPAD", "LEFT-ok");
+						stage = 0;
+						isIndChat = false;
+						MenuHistory(menuList::USERS);
+						MenuHeader(String(menuAll[menuNowSelect].itemName));
+						MenuAllUserDraw();
+						if (numElements > 0)
+						{
+							MenuDrawArow(0);
+						}
+						else
+						{
+							alertWindow("No users found", "Refresh in 30 seconds");
+						}
+						drawUpdate();
+					}
+
+					/*==========================================================*/
+				}
+			}
+			else if (MenuNow() == menuList::MAINMENU && keyNow == keyServ::keyOKCenter && menuNowSelect == menuList::FQA)
+			{
+
+				MenuHistory(menuList::FQA);
+				MenuHeader(String(menuAll[menuNowSelect].itemName));
+				MenuDrawDistance();
+				drawUpdate();
+			}
 			else if (MenuNow() == menuList::MAINMENU && keyNow == keyServ::keyUP) // UP
 			{
 				if (menuNowSelect <= menuCount - 1 && menuNowSelect > 0)
@@ -1934,7 +2092,7 @@ void loop()
 					drawUpdate();
 				}
 			}
-			else if (MenuNow() == MAINMENU && keyNow == keyDOWN) // DOWN
+			else if (MenuNow() == menuList::MAINMENU && keyNow == keyDOWN) // DOWN
 			{
 				if (menuNowSelect < menuCount - 1 && menuNowSelect >= 0)
 				{
@@ -2090,7 +2248,7 @@ void loop()
 				String tempTextSet;
 				static uint8_t stage = 0;
 				int cpufreqs[6] = {240, 160, 80, 40, 20, 10};
-				bool legality = true;
+				bool legality = true, reset = false;
 				static uint8_t counterFreq = 0;
 
 				if (keyNow == keyServ::keyENTER && stage == 0)
@@ -2150,8 +2308,51 @@ void loop()
 					}
 					else if (keyNow == keyServ::keyENTER)
 					{
-						if (pref.begin("AllSettings", false))
+						stage = 3;
+						reset = false;
+						tempTextSet = "Reset settings: <- No ->";
+						pt.DrawFilledRectangle(0, 60, 200, 60, UNCOLORED);
+						pt.DrawStringAt(10, 60, tempTextSet.c_str(), &Font12, COLORED);
+						drawUpdate();
+					}
+				}
+				else if (stage == 3)
+				{
+					if (keyNow == keyServ::keyRIGHT)
+					{
+						reset = false;
+						tempTextSet = "Reset settings: <- No ->";
+						pt.DrawFilledRectangle(0, 60, 200, 60, UNCOLORED);
+						pt.DrawStringAt(10, 60, tempTextSet.c_str(), &Font12, COLORED);
+						drawUpdate();
+					}
+					else if (keyNow == keyServ::keyLEFT)
+					{
+						reset = true;
+						tempTextSet = "Reset settings: <- Yes ->";
+						pt.DrawFilledRectangle(10, 60, 200, 60, UNCOLORED);
+						pt.DrawStringAt(10, 60, tempTextSet.c_str(), &Font12, COLORED);
+						drawUpdate();
+					}
+					else if (keyNow == keyServ::keyENTER)
+					{
+
+						if (reset)
 						{
+							pref.begin("AllSettings");
+							pref.clear();
+							pref.end();
+							pref.begin("LoraSettings");
+							pref.clear();
+							pref.end();
+
+							alertWindow("All set. reset", "Reboot in progress");
+							vTaskDelay(3000 / portTICK_PERIOD_MS);
+							ESP.restart();
+						}
+						else if (pref.begin("AllSettings", false))
+						{
+
 							pref.putBool("legality", legality);
 							pref.putInt("cpu_freq", cpufreqs[counterFreq]);
 							alertWindow("Data saved", "Reboot in progress");
@@ -2217,7 +2418,7 @@ void loop()
 #ifdef selfBroadMessaging
 	if (numElements > 0 && isGenChat && (millis() - sendBrodcast) >= (30000 + random(100, 5000)))
 	{
-		loraSendBroadcast(selfText[random(0, 19)]);
+		loraSendBroadcast(selfText[random(0, 16)]);
 		chatGenDraw();
 		drawUpdate();
 		sendBrodcast = millis();

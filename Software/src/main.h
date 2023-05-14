@@ -36,5 +36,17 @@
 #define inkBUSY_PIN 27
 #define inkCLK_PIN 14
 
+
+#define minLenghtOutMessage 5 //symbols
+
+#define APIKEY "*****************************"
+#define PINGADR "95.216.56.89"
+#define FIRMVERS "2.0.3"
+
+#define selfBroadMessaging
+
+#define COLORED 0
+#define UNCOLORED 1
+
 extern uint32_t deviceID;
 
