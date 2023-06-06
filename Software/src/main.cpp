@@ -179,48 +179,7 @@ int8_t menuHis[5], menuNow = -1;
 bool isIndChat = false, isGenChat = false, isTagsView = false, isCtrlActive = false;
 byte menuNowSelect = 0;
 
-bool initLoRa(void);				   // start
-int drawUpdate();					   // Print to display
-int drawAbout();					   // Add about information
-int drawSetOpMode(uint8_t, int16_t);   // Draw information about the selected communication quality
-int drawSetFreq(String);			   // Draw the CPU frequency settings
-int chatSingleDraw(uint32_t, uint8_t); // Print single Chat 1:1
-int chatGenDraw(uint8_t);			   // Chat where is all users in mesh
-int chatDrawOutmess();				   // Draw a string with a message to send in chat
-int loraSendBroadcast(String);		   // Send message to all
-int loraSendMessage(uint32_t, String); // Send message to user
-int loraSendConfirm(uint32_t, String);
-int MenuDraw();																 // Draw all menu
-int MenuAllUserDraw(uint8_t, uint8_t);										 // Display a list of users who are in a mesh network
-int MenuDrawArow(uint8_t);													 // Draw arrow in all menu
-int MenuDrawLoraSet();														 // Draw lora settings
-int MenuDrawAllSet();														 // Draw all settings
-int MenuDrawDistance();														 // Draw graph of the relative distance to users by signal quality
-int MenuDrawStatDb();														 //?????  In-memory message statistics
-int MenuHistory(uint8_t);													 // History menu to understand where we are and what happened before
-int MenuAllTagsDraw();														 // Display of all tags that are collected on the network
-int MenuHeader(String);														 // Top E-ink header
-int MenuNow();																 // Current menu item
-int db_addTag(String);														 // Adding tags to the structure
-int db_printAllTags();														 // Output to the logs of all tags that are stored
-int db_printGenALL();														 // Output to the logs of all messages in general chat that are stored
-int db_printIndALL();														 // Output to the logs of all individual chat that are stored
-int db_addGenMessage(uint32_t, String, uint16_t, int16_t, int8_t);			 // Add message to structure-database
-int db_addIndMessage(uint32_t, uint32_t, String, uint16_t, int16_t, int8_t); // Return the currently pressed button
-int db_getCountInputMessages(uint32_t, bool);
-void OnLoraData(uint32_t, uint8_t, uint16_t, int16_t, int8_t); // Callback message on LORA
-void onNodesListChange(void);
-String getLoraQualitySignal(int16_t, int16_t); // Callback when Node list Changed every 30 sec
-String getBattery();						   // Get the battery charge as a percentage
-String getVoltage();						   // Get the battery voltage
-String getConfirmCode(String);				   // Confirmation code processing (in text)
-int loraSendConfirm(uint32_t, String);		   // Sending a confirmation in individual chat
-int tagSingleDraw(String, uint8_t);
-int symCheck(byte);						 // Check the pressed button for the relation to the service buttons
-int PrintFreeHeap();					 // Print free heap in device
-int alertWindow(const char, const char); // alert window, without windows, of course.
-bool CounterUsersUpdater();				 // Print counter all users in mesh
-void onUpdateProgress(uint8_t, uint8_t); // Firmware upgrade process
+
 
 String getLoraQualitySignal(int16_t SNR, int16_t RSSI)
 {
@@ -1747,8 +1706,10 @@ void setup()
 
 	if (pref.begin("LoraSettings", false))
 	{
-		double freq = pref.getInt("rf_frequency", 0) / 1000000;
-		output = "Lora Frequency: " + String(freq) + "mHz";
+		
+		float freq = pref.getInt("rf_frequency", 0)/100000;	
+		ESP_LOGD("LORA","%f",freq);
+		output = "Lora Frequency: " + String(freq/10) + "mHz";		
 		pref.end();
 	}
 	else
@@ -1832,7 +1793,7 @@ void loop()
 		bool PRFlag = false;
 		if (keyNow & 0x80)
 		{
-			// ESP_LOGD("KEYPAD", "Press");
+			// ESP_LOGD("KEYPAD", "Press")д;
 			PRFlag = true;
 			keyNow &= 0x7F;
 			keyNow--;
@@ -2248,7 +2209,7 @@ void loop()
 				String tempTextSet;
 				static uint8_t stage = 0;
 				int cpufreqs[6] = {240, 160, 80, 40, 20, 10};
-				bool legality = true, reset = false;
+				bool legality = true, reset = false;	
 				static uint8_t counterFreq = 0;
 
 				if (keyNow == keyServ::keyENTER && stage == 0)
@@ -2309,9 +2270,9 @@ void loop()
 					else if (keyNow == keyServ::keyENTER)
 					{
 						stage = 3;
-						reset = false;
+						ESP_LOGD("SETTINGS","%d",stage);
 						tempTextSet = "Reset settings: <- No ->";
-						pt.DrawFilledRectangle(0, 60, 200, 60, UNCOLORED);
+						pt.DrawFilledRectangle(10, 60, 200, 60, UNCOLORED);
 						pt.DrawStringAt(10, 60, tempTextSet.c_str(), &Font12, COLORED);
 						drawUpdate();
 					}
@@ -2322,7 +2283,7 @@ void loop()
 					{
 						reset = false;
 						tempTextSet = "Reset settings: <- No ->";
-						pt.DrawFilledRectangle(0, 60, 200, 60, UNCOLORED);
+						pt.DrawFilledRectangle(10, 60, 200, 60, UNCOLORED);
 						pt.DrawStringAt(10, 60, tempTextSet.c_str(), &Font12, COLORED);
 						drawUpdate();
 					}
