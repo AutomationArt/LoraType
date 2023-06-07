@@ -1,0 +1,21 @@
+.pio/build/esp32dev/lib3f4/SX126x-Arduino-master/mac/region/Region.cpp.o: \
+ lib/SX126x-Arduino-master/src/mac/region/Region.cpp \
+ lib/SX126x-Arduino-master/src/boards/mcu/timer.h \
+ C:/Users/admin/.platformio/packages/framework-arduinoespressif32/libraries/Ticker/src/Ticker.h \
+ C:/Users/admin/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_timer/include/esp_timer.h \
+ C:/Users/admin/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_common/include/esp_err.h \
+ C:/Users/admin/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_common/include/esp_compiler.h \
+ lib/SX126x-Arduino-master/src/sx126x-debug.h \
+ lib/SX126x-Arduino-master/src/mac/LoRaMac.h \
+ lib/SX126x-Arduino-master/src/mac/region/Region.h \
+ lib/SX126x-Arduino-master/src/mac/Commissioning.h \
+ lib/SX126x-Arduino-master/src/mac/region/RegionAS923.h \
+ lib/SX126x-Arduino-master/src/mac/region/RegionAU915.h \
+ lib/SX126x-Arduino-master/src/mac/region/RegionCN470.h \
+ lib/SX126x-Arduino-master/src/mac/region/RegionCN779.h \
+ lib/SX126x-Arduino-master/src/mac/region/RegionEU433.h \
+ lib/SX126x-Arduino-master/src/mac/region/RegionEU868.h \
+ lib/SX126x-Arduino-master/src/mac/region/RegionKR920.h \
+ lib/SX126x-Arduino-master/src/mac/region/RegionIN865.h \
+ lib/SX126x-Arduino-master/src/mac/region/RegionUS915.h \
+ lib/SX126x-Arduino-master/src/mac/region/RegionRU864.h

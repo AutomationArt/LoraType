@@ -307,11 +307,9 @@ int OtaUpdate()
 {
 
 	String wifi_name = "", wifi_pass = "", tempText = "";
-
 	y_dis = 20;
 	MenuHeader("LoraType Update");
 	pt.DrawStringAt(10, y_dis, "Update firmware start", &Font8, COLORED);
-
 	y_dis += 14;
 	pt.DrawStringAt(10, y_dis, "Enter Wifi: ", &Font12, COLORED);
 	y_dis += 14;
@@ -404,16 +402,12 @@ int OtaUpdate()
 			}
 		}
 	}
-
 	ESP_LOGD("OTAUPDATE", "Break ok");
 	ESP_LOGD("OTAUPDATE", "%s", wifi_name);
 	ESP_LOGD("OTAUPDATE", "%s", wifi_pass);
-
 	WiFi.begin(wifi_name.c_str(), wifi_pass.c_str());
-
 	String network = "Connect to WiFi.";
 	y_dis += 16;
-
 	uint8_t timer = 0;
 	while (WiFi.status() != WL_CONNECTED)
 	{
@@ -430,7 +424,6 @@ int OtaUpdate()
 			break;
 		}
 	}
-
 	if (WiFi.status() == WL_CONNECTED)
 	{
 		bool success = Ping.ping(PINGADR, 3);
@@ -454,11 +447,9 @@ int OtaUpdate()
 			ESP.restart();
 		}
 	}
-
-	y_dis += 10;
+	y_dis += 10;		
 	String ip = "IP: " + String(WiFi.localIP());
 	pt.DrawStringAt(10, y_dis, ip.c_str(), &Font8, COLORED);
-
 	if (WiFi.status() == WL_CONNECTED)
 	{
 		// retrive firmware info from OTAdrive server
@@ -486,10 +477,11 @@ int OtaUpdate()
 			OTADRIVE.updateFirmware();
 		}
 	}
-
 	WiFi.disconnect();
 	ESP.restart();
 	return 0;
+
+
 }
 
 int MenuAllTagsDraw()
@@ -2279,6 +2271,7 @@ void loop()
 				}
 				else if (stage == 3)
 				{
+
 					if (keyNow == keyServ::keyRIGHT)
 					{
 						reset = false;

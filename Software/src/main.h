@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include "HttpsOTAUpdate.h"
 #include <esp_wifi.h>
 #include <Ticker.h>
 #include <Log/my-log.h>     
@@ -39,9 +40,9 @@
 
 #define minLenghtOutMessage 5 //symbols
 
-#define APIKEY "*****************************"
+#define APIKEY "7f59d82c-f8a1-4e49-bb23-696b26a8ffcd"
 #define PINGADR "95.216.56.89"
-#define FIRMVERS "2.0.3"
+#define FIRMVERS "2.0.3" 
 
 #define selfBroadMessaging
 
