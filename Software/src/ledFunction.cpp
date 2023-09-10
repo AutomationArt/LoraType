@@ -191,11 +191,18 @@ int LedLoraInputMess(bool state = false)
 	return 0;
 }
 
-int LedStart()
-{
-	pixels.begin();
-	clearLed();
-	return 0;
+int LedStart(bool ledIndicate)
+{							
+	if (ledIndicate)
+	{							
+		pixels.begin();
+		clearLed();
+		return 0;
+	}
+	else
+	{
+		return 1;
+	}
 }
 
 int LedSystemStart()

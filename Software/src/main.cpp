@@ -16,6 +16,7 @@ unsigned char img[5000];
 Paint pt(img, 0, 0);
 Adafruit_TCA8418 keypad;
 volatile bool TCA8418_event = false;
+bool ledIndicate = false;
 
 void TCA8418_irq()
 {
@@ -179,7 +180,15 @@ int8_t menuHis[5], menuNow = -1;
 bool isIndChat = false, isGenChat = false, isTagsView = false, isCtrlActive = false;
 byte menuNowSelect = 0;
 
+int alertWindow(const char *head, const char *message)
+{
+	pt.DrawRectangle(20, 55, 180, 100, COLORED);
+	pt.DrawFilledRectangle(21, 56, 179, 99, UNCOLORED);
+	pt.DrawStringAt(27, 65, head, &Font12, COLORED);
+	pt.DrawStringAt(27, 80, message, &Font12, COLORED);
 
+	return 0;
+}
 
 String getLoraQualitySignal(int16_t SNR, int16_t RSSI)
 {
@@ -196,12 +205,25 @@ String getLoraQualitySignal(int16_t SNR, int16_t RSSI)
 	return String((((SNR + 20) / 50) + ((RSSI + 130) / 110)) / 2);
 }
 
+
+int drawBatteryState(int batValue){					
+pt.DrawRectangle(153,4,155,7,UNCOLORED);	
+pt.DrawRectangle(155,2,170,9,UNCOLORED);
+
+for(int i=map(batValue,0,100,0,14); i>0; i=i-2){ 
+
+	pt.DrawVerticalLine(170-i,4,4,UNCOLORED);	
+}
+return 0;
+
+}
+
 int drawSetFreq(String ffrq = "")
 {
 	pt.DrawFilledRectangle(0, 22, 200, 200, UNCOLORED);
 	String tempText = "Enter Frequency: " + ffrq;
 	pt.DrawStringAt(10, 30, tempText.c_str(), &Font12, COLORED);
-	pt.DrawStringAt(10, 45, "- 850~930 (Example: 8682 = 868.2 MHz)", &Font8, COLORED);
+	pt.DrawStringAt(10, 45, "- 850~930 (Example: 86837 = 868.37 MHz)", &Font8, COLORED);
 	return 0;
 }
 
@@ -214,7 +236,7 @@ int drawSetOpMode(uint8_t mode_set, int16_t data_set[7][6])
 	{
 		pt.DrawFilledRectangle(10, 180, 200, 195, COLORED);
 		tempTextSet = "(Max range, slow data rate)";
-		pt.DrawStringAt(10, 180, tempTextSet.c_str(), &Font12, UNCOLORED);
+		pt.DrawStringAt(10, 182, tempTextSet.c_str(), &Font12, UNCOLORED);
 	}
 	else if (mode_set == 6)
 	{
@@ -227,7 +249,7 @@ int drawSetOpMode(uint8_t mode_set, int16_t data_set[7][6])
 	tempTextSet = "Select mode: <- " + String(mode_set) + " ->";
 	pt.DrawStringAt(10, 90, tempTextSet.c_str(), &Font12, COLORED);
 
-	tempTextSet = "BandWidth: " + String(data_set[mode_set][1]) + " kHz";
+	tempTextSet = "BandWidth: " + String(loraBandtoNum(data_set[mode_set][1], true)) + " kHz";
 	pt.DrawStringAt(10, 105, tempTextSet.c_str(), &Font12, COLORED);
 
 	tempTextSet = "Spreading factor: " + String(data_set[mode_set][3]);
@@ -269,7 +291,7 @@ int drawAbout()
 	pt.DrawLine(110, 40, 90, 55, COLORED);
 	pt.DrawHorizontalLine(75, 55, 15, COLORED);
 	pt.DrawLine(90, 55, 110, 70, COLORED);
-	pt.DrawStringAt(20, 80, "https://Automation.art", &Font12, COLORED);
+	pt.DrawStringAt(20, 80, "https://Loratype.org", &Font12, COLORED);	
 	pt.DrawStringAt(3, 95, "Meet LoraType - the urban 'teletype", &Font8, COLORED);
 	pt.DrawStringAt(3, 105, "tweeting'. It uses radio signal on", &Font8, COLORED);
 	pt.DrawStringAt(3, 115, "free frequency.It uses radio signal", &Font8, COLORED);
@@ -369,6 +391,7 @@ int OtaUpdate()
 						y_dis += 14;
 						pt.DrawStringAt(3, y_dis, "->", &Font12, COLORED);
 						stage = 1;
+						drawUpdate();
 					}
 				}
 				else if (stage == 1)
@@ -395,7 +418,6 @@ int OtaUpdate()
 					}
 					else if (keyNow == keyServ::keyENTER)
 					{
-						stage = 1;
 						break;
 					}
 				}
@@ -419,8 +441,11 @@ int OtaUpdate()
 		drawUpdate();
 		vTaskDelay(500 / portTICK_PERIOD_MS);
 		timer++;
-		if (timer == 15)
+		if (timer == 10)
 		{
+			alertWindow("Connect", "error");
+			drawUpdate();
+			vTaskDelay(2000 / portTICK_PERIOD_MS);
 			break;
 		}
 	}
@@ -447,16 +472,14 @@ int OtaUpdate()
 			ESP.restart();
 		}
 	}
-	y_dis += 10;		
+	y_dis += 10;
 	String ip = "IP: " + String(WiFi.localIP());
 	pt.DrawStringAt(10, y_dis, ip.c_str(), &Font8, COLORED);
 	if (WiFi.status() == WL_CONNECTED)
 	{
 		// retrive firmware info from OTAdrive server
 		updateInfo inf = OTADRIVE.updateFirmwareInfo();
-
 		ESP_LOGD("OTAUPDATE", "%s", inf.version);
-
 		String ver_now = "Version now: " + String(FIRMVERS);
 		y_dis += 10;
 		pt.DrawStringAt(10, y_dis, ver_now.c_str(), &Font8, COLORED);
@@ -464,9 +487,7 @@ int OtaUpdate()
 		ver_now = "New Version: " + inf.version;
 		y_dis += 10;
 		pt.DrawStringAt(10, y_dis, ver_now.c_str(), &Font8, COLORED);
-
 		drawUpdate();
-
 		// update firmware if newer available
 		if (inf.available)
 		{
@@ -480,8 +501,6 @@ int OtaUpdate()
 	WiFi.disconnect();
 	ESP.restart();
 	return 0;
-
-
 }
 
 int MenuAllTagsDraw()
@@ -552,6 +571,50 @@ int symCheck(byte keyCheck)
 
 bool caseUpperFlag = false;
 uint8_t keyboardColl = 0, keyboardRow = 0;
+
+int loraBandtoNum(uint16_t band, bool direction = true)
+{
+	if (direction)
+	{
+		switch (band)
+		{
+		case 125:
+			return 0;
+			break;
+
+		case 250:
+			return 1;
+			break;
+
+		case 500:
+			return 2;
+			break;
+		default:
+			return 1;
+			break;
+		}
+	}
+	else
+	{
+		switch (band)
+		{
+		case 0:
+			return 125;
+			break;
+
+		case 1:
+			return 250;
+			break;
+
+		case 2:
+			return 500;
+			break;
+		default:
+			return 250;
+			break;
+		}
+	}
+}
 
 int loraSendConfirm(uint32_t userMesh, String messKey)
 {
@@ -737,16 +800,6 @@ int db_printAllTags()
 	{
 		ESP_LOGD("DATABASE", "%d : %d - %d - %s", g, AllTag[g].active, AllTag[g].counter, AllTag[g].tag);
 	}
-	return 0;
-}
-
-int alertWindow(const char *head, const char *message)
-{
-	pt.DrawRectangle(20, 55, 180, 100, COLORED);
-	pt.DrawFilledRectangle(21, 56, 179, 99, UNCOLORED);
-	pt.DrawStringAt(27, 65, head, &Font12, COLORED);
-	pt.DrawStringAt(27, 80, message, &Font12, COLORED);
-
 	return 0;
 }
 
@@ -983,7 +1036,10 @@ int MenuDrawAllSet()
 			pt.DrawStringAt(20, 72, "violate the law)", &Font8, UNCOLORED);
 		}
 		tmpPrint = "Press \"ENTER\" to change";
-		pt.DrawStringAt(10, 175, tmpPrint.c_str(), &Font12, COLORED);
+
+		pt.DrawFilledRectangle(0,174, 200, 190,COLORED);
+
+		pt.DrawStringAt(10, 175, tmpPrint.c_str(), &Font12, UNCOLORED);
 	}
 	else
 	{
@@ -1004,16 +1060,16 @@ int MenuDrawLoraSet()
 
 	if (pref.begin("LoraSettings", false))
 	{
-		print_rf_frequency = pref.getInt("rf_frequency", 868200000);
-		print_tx_output_power = pref.getInt("tx_output_power", 14);
-		print_lora_spreading_factor = pref.getInt("lora_spreading", 12);
-		print_lora_codingrate = pref.getInt("lora_codingrate", 1);
-		print_lora_bandwidth = pref.getInt("lora_bandwidth", 125);
+		print_rf_frequency = pref.getInt("rf_frequency", LORAFREQ);
+		print_tx_output_power = pref.getInt("tx_output_power", LORATXPOWER);
+		print_lora_spreading_factor = pref.getInt("lora_spreading", LORASPREAD);
+		print_lora_codingrate = pref.getInt("lora_codingrate", LORACODINGRATE);
+		print_lora_bandwidth = loraBandtoNum(pref.getInt("lora_bandwidth", LORABAND), false);
 
 		pt.DrawFilledRectangle(0, 22, 200, 200, UNCOLORED);
 
-		float freqGet = print_rf_frequency / 100000;
-		String tmpPrint = "Frequency: " + String(freqGet / 10) + " mHz";
+		float freqGet = print_rf_frequency / 10000;
+		String tmpPrint = "Frequency: " + String(freqGet / 100) + " mHz";
 		pt.DrawStringAt(10, 30, tmpPrint.c_str(), &Font12, COLORED);
 
 		tmpPrint = "Power: " + String(print_tx_output_power) + " dBm";
@@ -1039,7 +1095,8 @@ int MenuDrawLoraSet()
 		pt.DrawStringAt(10, 105, tmpPrint.c_str(), &Font12, COLORED);
 
 		tmpPrint = "Press \"ENTER\" to change";
-		pt.DrawStringAt(10, 175, tmpPrint.c_str(), &Font12, COLORED);
+		pt.DrawFilledRectangle(0,174, 200, 190,COLORED);
+		pt.DrawStringAt(10, 175, tmpPrint.c_str(), &Font12, UNCOLORED);	
 	}
 	else
 	{
@@ -1113,6 +1170,7 @@ int MenuHeader(String middle_text)
 	pt.DrawStringAt(100 - ((middle_text.length() * 7) / 2), 0, middle_text.c_str(), &Font12, UNCOLORED);
 	String voltValue = getBattery();
 	pt.DrawStringAt(200 - 7 * voltValue.length(), 0, voltValue.c_str(), &Font12, UNCOLORED);
+	drawBatteryState(atoi(voltValue.c_str()));	  	
 	return 0;
 }
 
@@ -1137,7 +1195,7 @@ int MenuAllUserDraw(uint8_t frame = 0, uint8_t index = 0)
 
 	if (numElements == 0)
 	{
-		alertWindow("No user. Press Menu", "Update after 30 sec.");
+		alertWindow("No user. Press Menu", "Try again 30 sec.");
 	}
 	else
 	{
@@ -1218,7 +1276,7 @@ int chatSingleDraw(unsigned int activeUserId, uint8_t Upd = 0)
 
 	if (numElements == 0)
 	{
-		alertWindow("No user. Press Menu", "Update after 30 sec.");
+		alertWindow("No user. Press Menu", "Try again 30 sec.");
 	}
 	else
 	{
@@ -1249,7 +1307,7 @@ int chatSingleDraw(unsigned int activeUserId, uint8_t Upd = 0)
 				msgPrint = who + IndChat[t].message;
 				uint16_t lenmsg = msgPrint.length();
 				uint8_t howStr = (int)(lenmsg / 27) + 1;
-				
+
 				allstrCounter += howStr;
 				if (allstrCounter >= countinskStr)
 				{
@@ -1331,7 +1389,7 @@ int chatGenDraw(uint8_t Upd = 0)
 
 	if (numElements == 0)
 	{
-		alertWindow("No user. Press Menu", "Update after 30 sec.");
+		alertWindow("No user. Press Menu", "Try again 30 sec.");
 	}
 	else
 	{
@@ -1573,6 +1631,11 @@ void setup()
 		{
 			uint8_t cpuFreq = pref.getInt("cpu_freq", 80);
 			setCpuFrequencyMhz(cpuFreq); // set cpu frequency from settings
+			if (cpuFreq > 60)
+			{
+				ledIndicate = true;
+				LedStart(ledIndicate);	
+			}	
 			pref.end();
 		}
 	}
@@ -1661,7 +1724,6 @@ void setup()
 	deviceID += (uint32_t)deviceMac[3] << 16;
 	deviceID += (uint32_t)deviceMac[4] << 8;
 	deviceID += (uint32_t)deviceMac[5];
-	myLog_n("Mesh NodeId = %08lX", deviceID);
 	char DeviceIDmac[9];
 	itoa(deviceID, DeviceIDmac, 16);
 
@@ -1673,7 +1735,7 @@ void setup()
 	output = "Firmware Ver.:" + String(FIRMVERS);
 	pt.DrawStringAt(10, 110, output.c_str(), &Font12, COLORED);
 
-	output = "Mesh NodeId: " + String(DeviceIDmac);
+	output = "Your NodeId: " + String(DeviceIDmac);
 	pt.DrawStringAt(10, 125, output.c_str(), &Font12, COLORED);
 
 	if (!initLoRa())
@@ -1698,10 +1760,9 @@ void setup()
 
 	if (pref.begin("LoraSettings", false))
 	{
-		
-		float freq = pref.getInt("rf_frequency", 0)/100000;	
-		ESP_LOGD("LORA","%f",freq);
-		output = "Lora Frequency: " + String(freq/10) + "mHz";		
+		float freq = pref.getInt("rf_frequency", LORAFREQ) / 10000;
+		ESP_LOGD("LORA", "%f", freq);
+		output = "Lora Frequency: " + String(freq / 100) + "mHz";
 		pref.end();
 	}
 	else
@@ -1710,7 +1771,8 @@ void setup()
 	}
 	pt.DrawStringAt(10, 170, output.c_str(), &Font12, COLORED);
 
-	pt.DrawStringAt(10, 185, "Let's start.. Press MENU", &Font12, COLORED);
+	pt.DrawFilledRectangle(0,184,200,200,COLORED);	
+	pt.DrawStringAt(10, 185, "Let's start.. Press MENU", &Font12, UNCOLORED);
 
 	drawUpdate();
 	// delay(100);
@@ -1727,7 +1789,7 @@ void loop()
 		ESP_LOGD("LORA_Payload", "%s", OnLora_rxPayload);
 		if (OnLora_rxPayload[0] == '@')
 		{
-			ESP_LOGD("LORA", "Payload @");	
+			ESP_LOGD("LORA", "Payload @");
 			OnLora_rxPayload.remove(0, 1);
 			for (int i = 0; i < countMessage; i++)
 			{
@@ -1741,7 +1803,7 @@ void loop()
 			}
 		}
 		else if (OnLora_rxPayload[0] == '~')
-		{	
+		{
 			db_addIndMessage(OnLora_rxfromID, 13, OnLora_rxPayload, OnLora_rxSize, OnLora_rxRssi, OnLora_rxSnr);
 			// vTaskDelay(500 / portTICK_PERIOD_MS);
 			loraSendConfirm(OnLora_rxfromID, getConfirmCode(OnLora_rxPayload));
@@ -1785,7 +1847,7 @@ void loop()
 		bool PRFlag = false;
 		if (keyNow & 0x80)
 		{
-			// ESP_LOGD("KEYPAD", "Press")д;
+			// ESP_LOGD("KEYPAD", "Press");
 			PRFlag = true;
 			keyNow &= 0x7F;
 			keyNow--;
@@ -1797,6 +1859,17 @@ void loop()
 			{
 				isCtrlActive = true;
 				ESP_LOGD("keypad", "CTRL IS TRUE");
+			}
+			else if (keyNow == keyServ::keyMENU) // Main Menu
+			{
+				MenuHistory(-1);
+				isIndChat = false;
+				isGenChat = false;
+				outMessage = "";
+				MenuHeader("Menu");
+				MenuDraw();
+				MenuDrawArow(menuNowSelect);
+				drawUpdate();
 			}
 			if (MenuNow() == menuList::MAINMENU && keyNow == keyServ::keyOKCenter && menuNowSelect == menuList::EVERYTHING) // Enter
 			{
@@ -1851,6 +1924,7 @@ void loop()
 				{
 					outMessage.remove(outMessage.length() - 1, 1);
 					chatDrawOutmess();
+					drawUpdate();
 				}
 				else if (keyNow == keyServ::keyUP)
 				{
@@ -1870,17 +1944,6 @@ void loop()
 						drawUpdate();
 					}
 				}
-			}
-			else if (keyNow == keyServ::keyMENU) // Main Menu
-			{
-				MenuHistory(-1);
-				isIndChat = false;
-				isGenChat = false;
-				outMessage = "";
-				MenuHeader("Menu");
-				MenuDraw();
-				MenuDrawArow(menuNowSelect);
-				drawUpdate();
 			}
 			else if (MenuNow() == menuList::MAINMENU && keyNow == keyServ::keyOKCenter && menuNowSelect == menuList::USERS) // Enter to Users online list
 			{
@@ -1985,6 +2048,7 @@ void loop()
 					{
 						outMessage.remove(outMessage.length() - 1, 1);
 						chatDrawOutmess();
+						drawUpdate();
 					}
 					else if (keyNow == keyServ::keyUP)
 					{
@@ -2115,7 +2179,7 @@ void loop()
 						stage = 2;
 
 						tempTextSet = "Power: <- 14 -> dBm";
-						pt.DrawFilledRectangle(10, 60, 200, 75, UNCOLORED);
+						pt.DrawFilledRectangle(10, 60, 200, 73, UNCOLORED);
 						pt.DrawStringAt(10, 60, tempTextSet.c_str(), &Font12, COLORED);
 						pt.DrawStringAt(10, 75, "- (14-22dBm. >14dBm may be illegal)", &Font8, COLORED);
 						drawUpdate();
@@ -2168,12 +2232,22 @@ void loop()
 						if (pref.begin("LoraSettings", false))
 						{
 							int freq_set = freq.toInt() * 100000;
-							pref.putInt("rf_frequency", freq_set);
+							if (freq_set < 82000 || freq_set > 92000)
+							{
+								alertWindow("Error Freq range", "Pres Menu");
+								vTaskDelay(5000 / portTICK_PERIOD_MS);
+								ESP.restart();
+							}
+							else
+							{
+								pref.putInt("rf_frequency", freq_set);
+							}
 							ESP_LOGD("SETTINGS", "%d", freq_set);
 							pref.putInt("tx_output_power", powerLora[counterPower]);
 							pref.putInt("lora_spreading", modeLora[setModeLora][3]);
 							pref.putInt("lora_codingrate", modeLora[setModeLora][2]);
-							pref.putInt("lora_bandwidth", modeLora[setModeLora][1]);
+
+							pref.putInt("lora_bandwidth", loraBandtoNum(modeLora[setModeLora][1]));
 							pref.end();
 							alertWindow("Data saved", "Reboot in progress");
 							drawUpdate();
@@ -2201,7 +2275,7 @@ void loop()
 				String tempTextSet;
 				static uint8_t stage = 0;
 				int cpufreqs[6] = {240, 160, 80, 40, 20, 10};
-				bool legality = true, reset = false;	
+				static bool legality = true, reset = false;
 				static uint8_t counterFreq = 0;
 
 				if (keyNow == keyServ::keyENTER && stage == 0)
@@ -2214,7 +2288,7 @@ void loop()
 				}
 				else if (stage == 1)
 				{
-					if (keyNow == keyServ::keyRIGHT && counterFreq <= 5 && counterFreq >= 0)
+					if (keyNow == keyServ::keyRIGHT && counterFreq < 5 && counterFreq >= 0)
 					{
 						counterFreq += 1;
 						tempTextSet = "CPU Frequency: <- " + String(cpufreqs[counterFreq]) + " -> MHz";
@@ -2223,7 +2297,7 @@ void loop()
 						pt.DrawStringAt(10, 30, tempTextSet.c_str(), &Font12, COLORED);
 						drawUpdate();
 					}
-					else if (keyNow == keyServ::keyLEFT && counterFreq >= 0 && counterFreq <= 5)
+					else if (keyNow == keyServ::keyLEFT && counterFreq > 0 && counterFreq <= 5)
 					{
 						counterFreq -= 1;
 						tempTextSet = "CPU Frequency: <- " + String(cpufreqs[counterFreq]) + " -> MHz";
@@ -2262,9 +2336,9 @@ void loop()
 					else if (keyNow == keyServ::keyENTER)
 					{
 						stage = 3;
-						ESP_LOGD("SETTINGS","%d",stage);
+						ESP_LOGD("SETTINGS", "%d", stage);
 						tempTextSet = "Reset settings: <- No ->";
-						pt.DrawFilledRectangle(10, 60, 200, 60, UNCOLORED);
+						pt.DrawFilledRectangle(10, 60, 200, 75, UNCOLORED);
 						pt.DrawStringAt(10, 60, tempTextSet.c_str(), &Font12, COLORED);
 						drawUpdate();
 					}
@@ -2275,49 +2349,53 @@ void loop()
 					if (keyNow == keyServ::keyRIGHT)
 					{
 						reset = false;
+						ESP_LOGD("reset setting", "false");
 						tempTextSet = "Reset settings: <- No ->";
-						pt.DrawFilledRectangle(10, 60, 200, 60, UNCOLORED);
+						pt.DrawFilledRectangle(10, 60, 200, 75, UNCOLORED);
 						pt.DrawStringAt(10, 60, tempTextSet.c_str(), &Font12, COLORED);
 						drawUpdate();
 					}
 					else if (keyNow == keyServ::keyLEFT)
 					{
 						reset = true;
+						ESP_LOGD("reset setting", "true");
 						tempTextSet = "Reset settings: <- Yes ->";
-						pt.DrawFilledRectangle(10, 60, 200, 60, UNCOLORED);
+						pt.DrawFilledRectangle(10, 60, 200, 75, UNCOLORED);
 						pt.DrawStringAt(10, 60, tempTextSet.c_str(), &Font12, COLORED);
 						drawUpdate();
 					}
 					else if (keyNow == keyServ::keyENTER)
 					{
-
-						if (reset)
+						if (reset == true)
 						{
-							pref.begin("AllSettings");
+
+							pref.begin("AllSettings", false);
 							pref.clear();
 							pref.end();
 							pref.begin("LoraSettings");
 							pref.clear();
 							pref.end();
-
 							alertWindow("All set. reset", "Reboot in progress");
-							vTaskDelay(3000 / portTICK_PERIOD_MS);
-							ESP.restart();
-						}
-						else if (pref.begin("AllSettings", false))
-						{
-
-							pref.putBool("legality", legality);
-							pref.putInt("cpu_freq", cpufreqs[counterFreq]);
-							alertWindow("Data saved", "Reboot in progress");
 							drawUpdate();
-							pref.end();
 							vTaskDelay(5000 / portTICK_PERIOD_MS);
 							ESP.restart();
 						}
 						else
 						{
-							alertWindow("Error saving settings", "Press Menu and try again");
+							if (pref.begin("AllSettings", false))
+							{
+								pref.putBool("legality", legality);
+								pref.putInt("cpu_freq", cpufreqs[counterFreq]);
+								alertWindow("Data saved", "Reboot in progress");
+								drawUpdate();
+								pref.end();
+								vTaskDelay(5000 / portTICK_PERIOD_MS);
+								ESP.restart();
+							}
+							else
+							{
+								alertWindow("Error saving settings", "Press Menu and try again");
+							}
 						}
 					}
 				}

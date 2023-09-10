@@ -97,17 +97,17 @@ extern volatile xQueueHandle meshMsgQueue;
 
 //https://www.st.com/content/ccc/resource/training/technical/product_training/group1/ee/e6/ef/5b/7b/43/48/95/STM32WL-Peripheral-LoRaStack_LORASTACK/files/STM32WL-Peripheral-LoRaStack_LORASTACK.pdf/_jcr_content/translations/en.STM32WL-Peripheral-LoRaStack_LORASTACK.pdf
 // LoRa definitions
-#define RF_FREQUENCY 868200000    // Hz
+#define RF_FREQUENCY 868370000    // Hz
 #define TX_OUTPUT_POWER 14		  // dBm	
-#define LORA_SPREADING_FACTOR 12  // [SF7..SF12]
+#define LORA_SPREADING_FACTOR 11  // [SF7..SF12]
 #define LORA_CODINGRATE 1		  // [1: 4/5, 2: 4/6, 3: 4/7, 4: 4/8]	
-#define LORA_BANDWIDTH 1		// [0: 125 kHz, 1: 250 kHz, 2: 500 kHz, 3: Reserved]
+#define LORA_BANDWIDTH 2		// [0: 125 kHz, 1: 250 kHz, 2: 500 kHz, 3: Reserved]
 #define LORA_PREAMBLE_LENGTH 8  // Same for Tx and Rx	
 #define LORA_SYMBOL_TIMEOUT 0   // Symbols	
 #define LORA_FIX_LENGTH_PAYLOAD_ON false
 #define LORA_IQ_INVERSION_ON false
-#define RX_TIMEOUT_VALUE 5000
-#define TX_TIMEOUT_VALUE 5000
+#define RX_TIMEOUT_VALUE 7000				
+#define TX_TIMEOUT_VALUE 7000				
 
 struct nodesList
 {

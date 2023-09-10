@@ -24,7 +24,6 @@
 #define LORA_BROADCAST 3
 #define LORA_NODEMAP 4
 
-
 #define PinSDA 21
 #define PinSCL 22
 #define PinBattery 35
@@ -37,19 +36,26 @@
 #define inkBUSY_PIN 27
 #define inkCLK_PIN 14
 
+//Default settings
+#define LORAFREQ 868370000
+#define LORATXPOWER 14
+#define LORASPREAD 11
+#define LORACODINGRATE 1
+#define LORABAND 2
 
-#define minLenghtOutMessage 5 //symbols
 
-#define APIKEY "7f59d82c-f8a1-4e49-bb23-696b26a8ffcd"
+#define minLenghtOutMessage 4 //symbols
+
+#define APIKEY "7f59d82c-f8a1-4e49-bb23-696b26a8ffcd"               
 #define PINGADR "95.216.56.89"
-#define FIRMVERS "2.0.3" 
+#define FIRMVERS "2.0.5"
 
-#define selfBroadMessaging
+#define selfBroadMessaging  //for self-testing       
 
 #define COLORED 0
 #define UNCOLORED 1
-
 extern uint32_t deviceID;
+
 
 bool initLoRa(void);				   // start
 int drawUpdate();					   // Print to display
@@ -59,6 +65,7 @@ int drawSetFreq(String);			   // Draw the CPU frequency settings
 int chatSingleDraw(uint32_t, uint8_t); // Print single Chat 1:1
 int chatGenDraw(uint8_t);			   // Chat where is all users in mesh
 int chatDrawOutmess();				   // Draw a string with a message to send in chat
+int loraBandtoNum(uint16_t,bool);
 int loraSendBroadcast(String);		   // Send message to all
 int loraSendMessage(uint32_t, String); // Send message to user
 int loraSendConfirm(uint32_t, String);

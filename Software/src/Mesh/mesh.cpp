@@ -169,14 +169,13 @@ void initMesh(MeshEvents_t *events, int numOfNodes)
 	Preferences prefLora;
 	prefLora.begin("LoraSettings", false);
 
-	set_rf_frequency = prefLora.getInt("rf_frequency", 868200000);		  // 
-	set_tx_output_power = prefLora.getInt("tx_output_power", 14);				  // tx_output_power=14;
-	set_lora_spreading_factor = prefLora.getInt("lora_spreading", 12); // lora_spreading_factor=12
-	set_lora_codingrate = prefLora.getInt("lora_codingrate", 1);			  // lora_codingrate=12
-	set_lora_bandwidth = prefLora.getInt("lora_bandwidth", 1);				  // lora_bandwidth=1
+	set_rf_frequency = prefLora.getInt("rf_frequency", LORAFREQ);		  					
+	set_tx_output_power = prefLora.getInt("tx_output_power", LORATXPOWER);					  
+	set_lora_spreading_factor = prefLora.getInt("lora_spreading", LORASPREAD); 				
+	set_lora_codingrate = prefLora.getInt("lora_codingrate", LORACODINGRATE);				  
+	set_lora_bandwidth = prefLora.getInt("lora_bandwidth", LORABAND);				 		  
 
 	prefLora.end();
-
 
 
 	// Put LoRa into standby
@@ -190,7 +189,7 @@ void initMesh(MeshEvents_t *events, int numOfNodes)
 					  set_lora_spreading_factor, set_lora_codingrate,
 					  LORA_PREAMBLE_LENGTH, LORA_FIX_LENGTH_PAYLOAD_ON,
 					  true, 0, 0, LORA_IQ_INVERSION_ON, TX_TIMEOUT_VALUE);
-	// Set receive configuration
+	// Set receive configuration		
 	Radio.SetRxConfig(MODEM_LORA, LORA_BANDWIDTH, LORA_SPREADING_FACTOR,
 					  LORA_CODINGRATE, 0, LORA_PREAMBLE_LENGTH,
 					  LORA_SYMBOL_TIMEOUT, LORA_FIX_LENGTH_PAYLOAD_ON,
