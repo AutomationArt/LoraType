@@ -2,7 +2,7 @@
 
 ### NEWS LoraType...| 04.10.2023
 
-- We are on  [https://fosstodon.org]("https://fosstodon.org/ "https://fosstodon.org") / @loratype
+- We are on  [Fosstodon](https://fosstodon.org/@loratype "Fosstodon")  
 - We built a second version of the case
 - We have assembled a batch of devices (**50 pcs**)
 - New video of how it works! [https://youtu.be/M7Vq4bjurBg](https://youtu.be/M7Vq4bjurBg "https://youtu.be/M7Vq4bjurBg")
