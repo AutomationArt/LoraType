@@ -2,18 +2,18 @@
 
 ### NEWS LoraType...| 04.10.2023
 
-- We are on  [fosstodon.org]("https://fosstodon.org/ "fosstodon.org ") / @loratype
+- We are on  [https://fosstodon.org]("https://fosstodon.org/ "https://fosstodon.org") / @loratype
 - We built a second version of the case
 - We have assembled a batch of devices (**50 pcs**)
 - New video of how it works! [https://youtu.be/M7Vq4bjurBg](https://youtu.be/M7Vq4bjurBg "https://youtu.be/M7Vq4bjurBg")
-- We are adding new code to the project
-- We sent the devices to users for testing
-- (USA, Germany, Armenia)
-- In touch with @meshtastic, sent them devices to start joint integration 
+- We are adding new code to the project 
+- We sent the devices to users for testing (USA, Germany, Armenia)
+- In contact with @meshtastic, sent them devices to start joint integration 
 - We welcome comments and suggestions 😊
 
-[![LoraType](https://raw.githubusercontent.com/AutomationArt/LoraType/main/Image/LoraTypeNP1.jpg "LoraType1")](https://raw.githubusercontent.com/AutomationArt/LoraType/main/Image/LoraTypeNP1.jpg "LoraType1")
 [![LoraType](https://raw.githubusercontent.com/AutomationArt/LoraType/main/Image/LoratypeNP3.png "LoraType2")](https://raw.githubusercontent.com/AutomationArt/LoraType/main/Image/LoratypeNP3.png "LoraType2")
+[![LoraType](https://raw.githubusercontent.com/AutomationArt/LoraType/main/Image/LoraTypeNP1.jpg "LoraType1")](https://raw.githubusercontent.com/AutomationArt/LoraType/main/Image/LoraTypeNP1.jpg "LoraType1")
+
 
 ### LoraType
 Our priority is to make the user experience as simple as possible. It only has an on/off button, a widespread QWERTY-keyboard and a cute e-ink display. That’s it. However, in spite of simplicity the Loratype can be used as a tiny PC with possibility for programming and adding new functions thanks to embedded Wі-Fі, Bluetooth and esp32. Welcome on board and feel like home, dear like-minded fellows!
