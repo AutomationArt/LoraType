@@ -2,13 +2,11 @@
 
 ### LoraType Now  v2.1.0
 
-## Previous changes
-
+### Latest changes 
 1. Added OTA updates along with libraries
 
 
-### Latest changes 
-
+## Previous changes
 **- Changed**
 1. 	Changed the approach of working with the keyboard. The method of polling the keyboard is changed to interrupt operation.
 2. Removed unused variables and functions
