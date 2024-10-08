@@ -1,7 +1,11 @@
-#include <Arduino.h>
+
+
 #include <WiFi.h>
-#include "HttpsOTAUpdate.h"
-#include <esp_wifi.h>
+#include <AsyncTCP.h>
+
+#include <ESPAsyncWebServer.h>
+#include <ElegantOTA.h>
+
 #include <Ticker.h>
 #include <Log/my-log.h>     
 #include "esp_log.h"    
@@ -14,8 +18,7 @@
 #include "e_ink_display.h"
 #include "esp32-hal-cpu.h"
 #include <Preferences.h>
-#include "otadrive_esp.h"
-#include "ESP32Ping.h"
+
 
 //LoRa package types
 #define LORA_INVALID 0 
@@ -43,14 +46,11 @@
 #define LORACODINGRATE 1
 #define LORABAND 2
 
-
 #define minLenghtOutMessage 4 //symbols
 
-#define APIKEY "7f59d82c-f8a1-4e49-bb23-696b26a8ffcd"               
-#define PINGADR "95.216.56.89"
-#define FIRMVERS "2.0.5"
+#define FIRMVERS "2.1.0"
 
-#define selfBroadMessaging  //for self-testing       
+//#define selfBroadMessaging  //for self-testing      
 
 #define COLORED 0
 #define UNCOLORED 1
@@ -100,3 +100,5 @@ int PrintFreeHeap();					 // Print free heap in device
 int alertWindow(const char, const char); // alert window, without windows, of course.
 bool CounterUsersUpdater();				 // Print counter all users in mesh
 void onUpdateProgress(uint8_t, uint8_t); // Firmware upgrade process
+
+

@@ -7,11 +7,9 @@ https://lora.readthedocs.io/en/latest
 #include "main.h"
 #include "ledFunction.h"
 
-/*OTA Drive*/
-
 bool stateUpdate = false;
 Preferences pref;
-
+AsyncWebServer ServerELEG(80);
 unsigned char img[5000];
 Paint pt(img, 0, 0);
 Adafruit_TCA8418 keypad;
@@ -21,7 +19,6 @@ bool ledIndicate = false;
 void TCA8418_irq()
 {
 	TCA8418_event = true;
-	// ESP_LOGD("KEYPAD", "IRQ work");
 }
 
 enum keyServ
@@ -86,7 +83,7 @@ String OnLora_rxPayload;
 uint16_t OnLora_rxSize;
 int16_t OnLora_rxRssi;
 int8_t OnLora_rxSnr;
-String selfText[17] = {
+String selfText[17] = {	
 	"He who does not take risks lives on his pension.",
 	"They're all literate, aren't they? They all have sensory deprivation.",
 	"It's very hard to lose a dream, even by pursuing it.",
@@ -119,7 +116,7 @@ menuitem menuAll[] =
 		{false, 2, "Friend Quality"},
 		{false, 3, "Lora Settings"},
 		{false, 4, "All Settings"},
-		{false, 5, "Update firmware"},
+		{false, 5, "Update firmware (OTA)"},
 		{false, 6, "About"}};
 
 enum menuList
@@ -205,17 +202,17 @@ String getLoraQualitySignal(int16_t SNR, int16_t RSSI)
 	return String((((SNR + 20) / 50) + ((RSSI + 130) / 110)) / 2);
 }
 
+int drawBatteryState(int batValue)
+{
+	pt.DrawRectangle(153, 4, 155, 7, UNCOLORED);
+	pt.DrawRectangle(155, 2, 170, 9, UNCOLORED);
 
-int drawBatteryState(int batValue){					
-pt.DrawRectangle(153,4,155,7,UNCOLORED);	
-pt.DrawRectangle(155,2,170,9,UNCOLORED);
+	for (int i = map(batValue, 0, 100, 0, 14); i > 0; i = i - 2)
+	{
 
-for(int i=map(batValue,0,100,0,14); i>0; i=i-2){ 
-
-	pt.DrawVerticalLine(170-i,4,4,UNCOLORED);	
-}
-return 0;
-
+		pt.DrawVerticalLine(170 - i, 4, 4, UNCOLORED);
+	}
+	return 0;
 }
 
 int drawSetFreq(String ffrq = "")
@@ -255,7 +252,6 @@ int drawSetOpMode(uint8_t mode_set, int16_t data_set[7][6])
 	tempTextSet = "Spreading factor: " + String(data_set[mode_set][3]);
 	pt.DrawStringAt(10, 120, tempTextSet.c_str(), &Font12, COLORED);
 
-	//
 	if (data_set[mode_set][2] == 1)
 	{
 		tempTextSet = "Coding rate: 4/5";
@@ -291,7 +287,7 @@ int drawAbout()
 	pt.DrawLine(110, 40, 90, 55, COLORED);
 	pt.DrawHorizontalLine(75, 55, 15, COLORED);
 	pt.DrawLine(90, 55, 110, 70, COLORED);
-	pt.DrawStringAt(20, 80, "https://Loratype.org", &Font12, COLORED);	
+	pt.DrawStringAt(20, 80, "https://Loratype.org", &Font12, COLORED);
 	pt.DrawStringAt(3, 95, "Meet LoraType - the urban 'teletype", &Font8, COLORED);
 	pt.DrawStringAt(3, 105, "tweeting'. It uses radio signal on", &Font8, COLORED);
 	pt.DrawStringAt(3, 115, "free frequency.It uses radio signal", &Font8, COLORED);
@@ -304,202 +300,89 @@ int drawAbout()
 	return 0;
 }
 
-void onUpdateProgress(uint8_t progress, uint8_t totalt)
+unsigned long ota_progress_millis = 0;
+
+void onOTAStart()
 {
-	static uint8_t last = 0;
-	static uint8_t x_cor = 0;
-	uint8_t progressPercent = (100 * progress) / totalt;
+ESP_LOGD("UpdateOTA", "OTA update started");	
 
-	ESP_LOGD("UpdateOTA", "*");
+}
 
-	if (last != progressPercent && progressPercent % 10 == 0)
+void onOTAProgress(size_t current, size_t final)
+{
+
+	if (millis() - ota_progress_millis > 1000)
 	{
-		// print every 10%
-		ESP_LOGD("UpdateOTA", "%d", progressPercent);
-
-		String progress = "." + String(progressPercent) + ".";
-		x_cor += 15;
-		pt.DrawStringAt(x_cor, y_dis, progress.c_str(), &Font8, COLORED);
+		ota_progress_millis = millis();
+		String result = "Progress: " + String(current / 1000) + " kb. Final:" + String(final / 1000) + " kb.";
+		pt.DrawFilledRectangle(0, 50, 200, 200, UNCOLORED);
+		pt.DrawStringAt(15, 60, result.c_str(), &Font8, COLORED);
 		drawUpdate();
 	}
-	last = progressPercent;
+}
+
+void onOTAEnd(bool success)
+{
+
+	if (success)
+	{
+		pt.DrawStringAt(15, 70, "OTA update finished successfully!", &Font8, COLORED);
+		ESP_LOGD("UpdateOTA", "OTA update finished successfully!");
+	}
+	else
+	{
+		ESP_LOGD("UpdateOTA", "There was an error during OTA update!");
+		pt.DrawStringAt(15, 70, "There was an error during!", &Font8, COLORED);
+	}
+
 }
 
 int OtaUpdate()
 {
-
 	String wifi_name = "", wifi_pass = "", tempText = "";
 	y_dis = 20;
 	MenuHeader("LoraType Update");
-	pt.DrawStringAt(10, y_dis, "Update firmware start", &Font8, COLORED);
+
+	char DeviceIDmac[9];	
+	itoa(deviceID, DeviceIDmac, 16);
+	String point = "LoraType-" + String(DeviceIDmac);
+	String  pointwifi="Start Wi-Fi: "+point;
+
+	pt.DrawStringAt(10, y_dis, pointwifi.c_str(), &Font8, COLORED);
 	y_dis += 14;
-	pt.DrawStringAt(10, y_dis, "Enter Wifi: ", &Font12, COLORED);
-	y_dis += 14;
-	pt.DrawStringAt(3, y_dis, "->", &Font12, COLORED);
 	drawUpdate();
+
+	
+	WiFi.softAP(point.c_str(), "loratype");
+
+	IPAddress IP = WiFi.softAPIP();
+	y_dis += 10;
+	String ip = "Server IP: " + IP.toString();
+	pt.DrawStringAt(10, y_dis, ip.c_str(), &Font8, COLORED);
+	drawUpdate();
+
+	y_dis += 10;
+	pt.DrawStringAt(10, y_dis, "OTA Server available", &Font8, COLORED);
+	drawUpdate();
+
 	uint8_t stage = 0;
+
+	ServerELEG.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+				  { request->send(200, "text/plain", "Hello! This is ElegantOTA AsyncDemo in LoraType. Get to /upload"); });
+
+	ElegantOTA.begin(&ServerELEG); 
+	// ElegantOTA callbacks
+	ElegantOTA.onStart(onOTAStart);
+	ElegantOTA.onProgress(onOTAProgress);
+	ElegantOTA.onEnd(onOTAEnd);
+
+	ServerELEG.begin();
+
 	while (1)
 	{
-		if (TCA8418_event == true)
-		{
-			int keyNow = keypad.getEvent();
-			keypad.writeRegister(TCA8418_REG_INT_STAT, 1);
-			int intstat = keypad.readRegister(TCA8418_REG_INT_STAT);
-			if ((intstat & 0x01) == 0)
-			{
-				TCA8418_event = false;
-			}
-
-			if (keyNow & 0x80)
-			{
-				keyNow &= 0x7F;
-				keyNow--;
-				byte col = keyNow / 10;
-				byte row = keyNow % 10;
-
-				if (keyNow == keyServ::keyCTRL)
-				{
-					isCtrlActive = true;
-				}
-
-				if (stage == 0)
-				{
-					if (symCheck(keyNow) == 0)
-					{
-						if (isCtrlActive)
-						{
-							wifi_name += keySymbCase[col][row];
-						}
-						else
-						{
-							wifi_name += keyDownCase[col][row];
-						}
-
-						pt.DrawFilledRectangle(16, y_dis - 2, 200, y_dis + 14, UNCOLORED);
-						pt.DrawStringAt(16, y_dis, wifi_name.c_str(), &Font12, COLORED);
-						drawUpdate();
-					}
-					else if (keyNow == keyServ::keyBACKSPACE)
-					{
-						wifi_name.remove(wifi_name.length() - 1, 1);
-						drawUpdate();
-					}
-					else if (keyNow == keyServ::keyENTER)
-					{
-						y_dis += 14;
-						pt.DrawStringAt(10, y_dis, "Enter Pass: ", &Font12, COLORED);
-						y_dis += 14;
-						pt.DrawStringAt(3, y_dis, "->", &Font12, COLORED);
-						stage = 1;
-						drawUpdate();
-					}
-				}
-				else if (stage == 1)
-				{
-					if (symCheck(keyNow) == 0)
-					{
-						if (isCtrlActive)
-						{
-							wifi_pass += keySymbCase[col][row];
-						}
-						else
-						{
-							wifi_pass += keyDownCase[col][row];
-						}
-
-						pt.DrawFilledRectangle(16, y_dis - 2, 200, y_dis + 14, UNCOLORED);
-						pt.DrawStringAt(16, y_dis, wifi_pass.c_str(), &Font12, COLORED);
-						drawUpdate();
-					}
-					else if (keyNow == keyServ::keyBACKSPACE)
-					{
-						wifi_pass.remove(wifi_pass.length() - 1, 1);
-						drawUpdate();
-					}
-					else if (keyNow == keyServ::keyENTER)
-					{
-						break;
-					}
-				}
-			}
-		}
+		ElegantOTA.loop();
 	}
-	ESP_LOGD("OTAUPDATE", "Break ok");
-	ESP_LOGD("OTAUPDATE", "%s", wifi_name);
-	ESP_LOGD("OTAUPDATE", "%s", wifi_pass);
-	WiFi.begin(wifi_name.c_str(), wifi_pass.c_str());
-	String network = "Connect to WiFi.";
-	y_dis += 16;
-	uint8_t timer = 0;
-	while (WiFi.status() != WL_CONNECTED)
-	{
-		ESP_LOGD("OTAUPDATE", ".....");
 
-		network += "..";
-		pt.DrawFilledRectangle(16, y_dis - 2, 200, y_dis + 9, UNCOLORED);
-		pt.DrawStringAt(10, y_dis, network.c_str(), &Font8, COLORED);
-		drawUpdate();
-		vTaskDelay(500 / portTICK_PERIOD_MS);
-		timer++;
-		if (timer == 10)
-		{
-			alertWindow("Connect", "error");
-			drawUpdate();
-			vTaskDelay(2000 / portTICK_PERIOD_MS);
-			break;
-		}
-	}
-	if (WiFi.status() == WL_CONNECTED)
-	{
-		bool success = Ping.ping(PINGADR, 3);
-		if (success)
-		{
-
-			ESP_LOGD("OTAUPDATE", "Server available");
-			y_dis += 10;
-			pt.DrawStringAt(10, y_dis, "OTA Server available", &Font8, COLORED);
-			drawUpdate();
-		}
-		else
-		{
-
-			ESP_LOGD("OTAUPDATE", "Server not available. Restart..");
-			y_dis += 10;
-			pt.DrawStringAt(10, y_dis, "Server not available. Restart..", &Font8, COLORED);
-			drawUpdate();
-			WiFi.disconnect();
-			vTaskDelay(6000 / portTICK_PERIOD_MS);
-			ESP.restart();
-		}
-	}
-	y_dis += 10;
-	String ip = "IP: " + String(WiFi.localIP());
-	pt.DrawStringAt(10, y_dis, ip.c_str(), &Font8, COLORED);
-	if (WiFi.status() == WL_CONNECTED)
-	{
-		// retrive firmware info from OTAdrive server
-		updateInfo inf = OTADRIVE.updateFirmwareInfo();
-		ESP_LOGD("OTAUPDATE", "%s", inf.version);
-		String ver_now = "Version now: " + String(FIRMVERS);
-		y_dis += 10;
-		pt.DrawStringAt(10, y_dis, ver_now.c_str(), &Font8, COLORED);
-
-		ver_now = "New Version: " + inf.version;
-		y_dis += 10;
-		pt.DrawStringAt(10, y_dis, ver_now.c_str(), &Font8, COLORED);
-		drawUpdate();
-		// update firmware if newer available
-		if (inf.available)
-		{
-			String start_now = "Start update..." + inf.version;
-			y_dis += 10;
-			pt.DrawStringAt(10, y_dis, start_now.c_str(), &Font8, COLORED);
-			y_dis += 10;
-			OTADRIVE.updateFirmware();
-		}
-	}
-	WiFi.disconnect();
-	ESP.restart();
 	return 0;
 }
 
@@ -705,13 +588,6 @@ int loraSendMessage(uint32_t userMesh, String msgData)
 
 				ESP_LOGD("LORA", "Queuing msg direct to %08X", outData.dest);
 			}
-
-			// int MsLen = msgData.length();
-			// if (MsLen <= 243)
-			// {
-			// msgData.getBytes(outData.data, MsLen);
-			//	int dataLen = MAP_HEADER_SIZE + MsLen;
-			//	int dataLen = MAP_HEADER_SIZE + sprintf((char *)outData.data, ">>%08X<<", deviceID);
 
 			String key = String(deviceID);
 
@@ -920,7 +796,6 @@ String getConfirmCode(String Payload)
 	return Data;
 }
 
-// Callback after the nodes list changed
 void onNodesListChange(void)
 {
 	nodesListChanged = true;
@@ -1037,7 +912,7 @@ int MenuDrawAllSet()
 		}
 		tmpPrint = "Press \"ENTER\" to change";
 
-		pt.DrawFilledRectangle(0,174, 200, 190,COLORED);
+		pt.DrawFilledRectangle(0, 174, 200, 190, COLORED);
 
 		pt.DrawStringAt(10, 175, tmpPrint.c_str(), &Font12, UNCOLORED);
 	}
@@ -1095,8 +970,8 @@ int MenuDrawLoraSet()
 		pt.DrawStringAt(10, 105, tmpPrint.c_str(), &Font12, COLORED);
 
 		tmpPrint = "Press \"ENTER\" to change";
-		pt.DrawFilledRectangle(0,174, 200, 190,COLORED);
-		pt.DrawStringAt(10, 175, tmpPrint.c_str(), &Font12, UNCOLORED);	
+		pt.DrawFilledRectangle(0, 174, 200, 190, COLORED);
+		pt.DrawStringAt(10, 175, tmpPrint.c_str(), &Font12, UNCOLORED);
 	}
 	else
 	{
@@ -1128,13 +1003,6 @@ bool CounterUsersUpdater()
 String getBattery()
 {
 	int adcValue = analogRead(PinBattery);
-
-	//	4095 = 100%
-	//  2827 = 0%
-
-	// 0 -  2827  -   4095
-	// 0в - 2.9 -  4.2в
-
 	String batterystate;
 	int mapPercent = map(adcValue, 2827, 4095, 0, 100);
 	if (mapPercent > 100 || mapPercent < 0)
@@ -1170,7 +1038,7 @@ int MenuHeader(String middle_text)
 	pt.DrawStringAt(100 - ((middle_text.length() * 7) / 2), 0, middle_text.c_str(), &Font12, UNCOLORED);
 	String voltValue = getBattery();
 	pt.DrawStringAt(200 - 7 * voltValue.length(), 0, voltValue.c_str(), &Font12, UNCOLORED);
-	drawBatteryState(atoi(voltValue.c_str()));	  	
+	drawBatteryState(atoi(voltValue.c_str()));
 	return 0;
 }
 
@@ -1185,13 +1053,9 @@ int MenuDrawStatDb()
 
 int MenuAllUserDraw(uint8_t frame = 0, uint8_t index = 0)
 {
-	// // const
+	
 	uint8_t xcoor = 20;
 	pt.DrawFilledRectangle(0, 23, 200, 200, UNCOLORED);
-	// for (int idx = 0; idx < numElements; idx++)
-	// {
-	// 	getNode(idx, nodeId[idx], firstHop[idx], numHops[idx]);
-	// }
 
 	if (numElements == 0)
 	{
@@ -1217,12 +1081,10 @@ int MenuAllUserDraw(uint8_t frame = 0, uint8_t index = 0)
 		{
 			if (firstHop[idx] == 0)
 			{
-				// sprintf(line, "%08X", nodeId[idx]);
 				sprintf(line, "%d: %02X%02X%02X%02X (%d/%d)", idx + 1, (uint8_t)(nodeId[idx] >> 24), (uint8_t)(nodeId[idx] >> 16), (uint8_t)(nodeId[idx] >> 8), (uint8_t)(nodeId[idx] >> 0), db_getCountInputMessages(nodeId[idx], true), db_getCountInputMessages(nodeId[idx], false));
 			}
 			else
 			{
-				// sprintf(line, "%08X*", nodeId[idx]);
 				sprintf(line, "%d: %02X%02X%02X%02X* (%d/%d)", idx + 1, (uint8_t)(nodeId[idx] >> 24), (uint8_t)(nodeId[idx] >> 16), (uint8_t)(nodeId[idx] >> 8), (uint8_t)(nodeId[idx] >> 0), db_getCountInputMessages(nodeId[idx], true), db_getCountInputMessages(nodeId[idx], false));
 			}
 			pt.DrawStringAt(xcoor, 25 + (idx * 15), line, &Font12, COLORED);
@@ -1314,13 +1176,13 @@ int chatSingleDraw(unsigned int activeUserId, uint8_t Upd = 0)
 					allstrCounter = countinskStr;
 				}
 
-				// 2
+			
 				if (howStr > 1)
 				{
 					uint16_t lastpos = 28;
 					uint16_t startpos = 0;
 					String line1;
-					// 1 0
+					
 					for (uint16_t c = 1; c <= howStr; c++)
 					{
 						line1 = msgPrint.substring(startpos, lastpos);
@@ -1355,7 +1217,7 @@ int chatSingleDraw(unsigned int activeUserId, uint8_t Upd = 0)
 		}
 
 		for (int h = 0; h <= 10; h++)
-		{ // 165 - 0
+		{ 
 			int ypos = ycoordinates - (h * 15);
 			int howmes = countinskStr - 1 - h;
 			if (howmes > 0)
@@ -1366,7 +1228,6 @@ int chatSingleDraw(unsigned int activeUserId, uint8_t Upd = 0)
 
 		//	delete[] allTextArray;
 
-		/* ================================================ */
 	}
 
 	pt.DrawHorizontalLine(2, 180, 196, COLORED);
@@ -1414,9 +1275,6 @@ int chatGenDraw(uint8_t Upd = 0)
 					who = String(outputString) + ":";
 				}
 
-				//	msgPrint = who + GenChat[t].message + "(" + String(GenChat[t].OnLora_rxRssi) + "/" + String(GenChat[t].OnLora_rxSnr+")");
-				// ESP_LOGD("LORA QA", "%s", getLoraQualitySignal(GenChat[t].OnLora_rxSnr, GenChat[t].OnLora_rxRssi));
-				// msgPrint = who + GenChat[t].message + "-" + getLoraQualitySignal(GenChat[t].OnLora_rxSnr,GenChat[t].OnLora_rxRssi) + "%";
 				msgPrint = who + GenChat[t].message;
 
 				uint16_t lenmsg = msgPrint.length();
@@ -1434,7 +1292,7 @@ int chatGenDraw(uint8_t Upd = 0)
 					uint16_t lastpos = 28;
 					uint16_t startpos = 0;
 					String line1;
-					// 1 0
+			
 					for (uint16_t c = 1; c <= howStr; c++)
 					{
 						line1 = msgPrint.substring(startpos, lastpos);
@@ -1476,7 +1334,6 @@ int chatGenDraw(uint8_t Upd = 0)
 			if (howmes > 0)
 			{
 				pt.DrawStringAt(0, ypos, inkStr[howmes - Upd].c_str(), &Font12, COLORED);
-				// ESP_LOGD("EINK", "%s", inkStr[howmes - Upd]);
 			}
 		}
 		//	delete[] allTextArray;
@@ -1500,7 +1357,7 @@ int tagSingleDraw(String activeTags, uint8_t Upd = 0)
 
 	String msgPrint, who;
 
-	// Буфер сообщений для вывода
+
 	String inkStr[countinskStr];
 	for (int g = 0; g < countinskStr; g++)
 	{
@@ -1512,25 +1369,22 @@ int tagSingleDraw(String activeTags, uint8_t Upd = 0)
 
 		if (genchatMess.indexOf(activeTags, 0) != -1)
 		{
-			// сообщение полностью с id
 
 			uint16_t lenmsg = genchatMess.length();
-			uint8_t howStr = (int)(lenmsg / 27) + 1; // количество строк занимаемое сообщением
+			uint8_t howStr = (int)(lenmsg / 27) + 1; 
 
-			allstrCounter += howStr; // Добавление общего количества строк
+			allstrCounter += howStr; 
 			if (allstrCounter >= countinskStr)
 			{
 				allstrCounter = countinskStr;
 			}
 
-			// 2
 			if (howStr > 1)
 			{
 
 				uint16_t lastpos = 28;
 				uint16_t startpos = 0;
 				String line1;
-				// 1 0
 				for (uint16_t c = 1; c <= howStr; c++)
 				{
 					line1 = genchatMess.substring(startpos, lastpos);
@@ -1564,7 +1418,7 @@ int tagSingleDraw(String activeTags, uint8_t Upd = 0)
 		}
 
 		for (int h = 0; h <= 10; h++)
-		{ // 165 - 0
+		{ 
 			int ypos = ycoordinates - (h * 15);
 			int howmes = countinskStr - 1 - h;
 			if (howmes > 0)
@@ -1574,7 +1428,6 @@ int tagSingleDraw(String activeTags, uint8_t Upd = 0)
 		}
 
 		//	delete[] allTextArray;
-		/* ================================================ */
 	}
 	return 0;
 }
@@ -1634,8 +1487,8 @@ void setup()
 			if (cpuFreq > 60)
 			{
 				ledIndicate = true;
-				LedStart(ledIndicate);	
-			}	
+				LedStart(ledIndicate);
+			}
 			pref.end();
 		}
 	}
@@ -1647,11 +1500,9 @@ void setup()
 	ESP_LOGD("Version", "%s", FIRMVERS);
 
 	// WiFi.disconnect(true);
-	// WiFi.mode(WIFI_OFF);
+	// WiFi.mode(WIFI_OFF);		
 	// WiFi.disconnect();
 
-	OTADRIVE.setInfo(APIKEY, FIRMVERS);
-	OTADRIVE.onUpdateFirmwareProgress(onUpdateProgress);
 	LedSystemStart();
 
 	uint32_t Freq = getCpuFrequencyMhz();
@@ -1690,6 +1541,16 @@ void setup()
 	}
 	MenuHeader("LoraType");
 
+	uint8_t deviceMac[8];
+	BoardGetUniqueId(deviceMac);
+	deviceID += (uint32_t)deviceMac[2] << 24;
+	deviceID += (uint32_t)deviceMac[3] << 16;
+	deviceID += (uint32_t)deviceMac[4] << 8;
+	deviceID += (uint32_t)deviceMac[5];
+	char DeviceIDmac[9];
+	itoa(deviceID, DeviceIDmac, 16);
+
+
 	if (stateUpdate)
 	{
 		pref.begin("Update");
@@ -1699,33 +1560,6 @@ void setup()
 	}
 
 	pt.DrawStringAt(30, 45, "LoraType..|", &Font20, COLORED);
-
-	/* Logo AA
-		pt.DrawHorizontalLine(90, 25, 20, COLORED);
-		pt.DrawLine(110, 25, 125, 40, COLORED);
-		pt.DrawVerticalLine(125, 40, 15, COLORED);
-		pt.DrawLine(125, 55, 110, 70, COLORED);
-		pt.DrawHorizontalLine(90, 70, 20, COLORED);
-		pt.DrawLine(90, 70, 75, 55, COLORED);
-		pt.DrawVerticalLine(75, 40, 15, COLORED);
-		pt.DrawLine(75, 40, 90, 25, COLORED);
-		pt.DrawLine(90, 25, 110, 40, COLORED);
-		pt.DrawVerticalLine(110, 25, 15, COLORED);
-		pt.DrawLine(110, 40, 90, 55, COLORED);
-		pt.DrawHorizontalLine(75, 55, 15, COLORED);
-		pt.DrawLine(90, 55, 110, 70, COLORED);
-		pt.DrawStringAt(10, 80, "Welcome!", &Font12, COLORED);
-		*/
-	/*==============================Lora=======================*/
-	// Create node ID
-	uint8_t deviceMac[8];
-	BoardGetUniqueId(deviceMac);
-	deviceID += (uint32_t)deviceMac[2] << 24;
-	deviceID += (uint32_t)deviceMac[3] << 16;
-	deviceID += (uint32_t)deviceMac[4] << 8;
-	deviceID += (uint32_t)deviceMac[5];
-	char DeviceIDmac[9];
-	itoa(deviceID, DeviceIDmac, 16);
 
 	String output = "";
 
@@ -1771,7 +1605,7 @@ void setup()
 	}
 	pt.DrawStringAt(10, 170, output.c_str(), &Font12, COLORED);
 
-	pt.DrawFilledRectangle(0,184,200,200,COLORED);	
+	pt.DrawFilledRectangle(0, 184, 200, 200, COLORED);
 	pt.DrawStringAt(10, 185, "Let's start.. Press MENU", &Font12, UNCOLORED);
 
 	drawUpdate();
@@ -2423,7 +2257,7 @@ void loop()
 				pref.putBool("state", true);
 				pref.end();
 				alertWindow("OTAUpdate", "Rebooting");
-				ESP_LOGD("OTAUPDATE", "Rebooting and start updated via WI-FI");
+				ESP_LOGD("OTAUPDATE", "Rebooting and start OTA server");
 				drawUpdate();
 				vTaskDelay(2000);
 				ESP.restart();
@@ -2469,12 +2303,6 @@ void loop()
 	if ((millis() - itwork) >= 10000)
 	{
 		heartLed();
-		// Bad idea)))))
-		/*  pt.DrawCircle(194, 17, 3, COLORED);
-		  pt.DrawFilledCircle(194, 17, 2, (int)workFlag);
-		  workFlag = !workFlag;
-		  drawUpdate();
-		*/
 		itwork = millis();
 	}
 
