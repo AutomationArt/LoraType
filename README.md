@@ -1,6 +1,13 @@
 [![LoraType](https://raw.githubusercontent.com/AutomationArt/LoraType/main/Image/LoraType.png "LoraType")](https://raw.githubusercontent.com/AutomationArt/LoraType/main/Image/LoraType.png "LoraType")
 
-### NEWS LoraType...| 04.10.2023
+### NEWS LoraType...| 08.10.2024
+
+Hello everyone! Straight to the point: we've integrated new OTA updates. Now you can update firmware locally, independent of the internet and the availability of an online service. We’ve integrated [ElegantOTA](https://github.com/ayushsharma82/ElegantOTA) (an OTA server runs on the device, and you can conveniently upload your modified firmware — it's made by people for people).
+We invite everyone to test, develop, innovate, and especially mesh protocol nerds!
+For testing, you can purchase devices at our local store: [shop.automation.art](https://shop.automation.art/products/radio-868mhz-mesendzher-tekstova-ratsiya-loratype-prototip/)
+
+
+### Previous News
 
 - We are on  [Fosstodon](https://fosstodon.org/@loratype "Fosstodon")  
 - We built a second version of the case
