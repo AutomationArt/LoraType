@@ -1,8 +1,13 @@
 [![LoraType](https://raw.githubusercontent.com/AutomationArt/LoraType/main/Image/LoraType.png "LoraType")](https://raw.githubusercontent.com/AutomationArt/LoraType/main/Image/LoraType.png "LoraType")
 
-### LoraType Now  v2.0.2
+### LoraType Now  v2.1.0
 
-### Latest changes 2.0.2
+## Previous changes
+
+1. Added OTA updates along with libraries
+
+
+### Latest changes 
 
 **- Changed**
 1. 	Changed the approach of working with the keyboard. The method of polling the keyboard is changed to interrupt operation.
